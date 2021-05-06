@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.akm.letscook.view.home.HomeFragment"
+        android:label="HomeFragment" />
+    <fragment
+        android:id="@+id/categoryFragment"
+        android:name="com.akm.letscook.view.category.CategoryFragment"
+        android:label="CategoryFragment" >
+        <action
+            android:id="@+id/action_categoryFragment_to_categoryMealsFragment"
+            app:destination="@id/categoryMealsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/categoryMealsFragment"
+        android:name="com.akm.letscook.view.categorymeals.CategoryMealsFragment"
+        android:label="CategoryMealsFragment" >
+        <argument
+            android:name="categoryName"
+            app:argType="string" />
+        <argument
+            android:name="savedDate"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/detailFragment"
+        android:name="com.akm.letscook.view.detail.DetailFragment"
+        android:label="DetailFragment" >
+        <argument
+            android:name="mealId"
+            app:argType="long" />
+        <argument
+            android:name="savedDate"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/favoriteFragment"
+        android:name="com.akm.letscook.view.favorite.FavoriteFragment"
+        android:label="FavoriteFragment" />
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.akm.letscook.view.search.SearchFragment"
+        android:label="SearchFragment" />
+    <action android:id="@+id/action_global_detailFragment" app:destination="@id/detailFragment" />
+</navigation>
