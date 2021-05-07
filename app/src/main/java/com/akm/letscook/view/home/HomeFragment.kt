@@ -17,7 +17,6 @@ import coil.load
 import coil.metadata
 import coil.transform.RoundedCornersTransformation
 import com.akm.letscook.NavigationGraphDirections
-import com.akm.letscook.R
 import com.akm.letscook.databinding.FragmentHomeBinding
 import com.akm.letscook.model.domain.Meal
 import com.akm.letscook.util.Resource
@@ -44,7 +43,7 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
 
         binding.homeCardView.visibility = View.GONE

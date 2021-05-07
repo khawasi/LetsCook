@@ -31,7 +31,7 @@ class SearchFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
         binding.searchTextInputLayout.setStartIconOnClickListener{
             findNavController().popBackStack()

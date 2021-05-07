@@ -29,7 +29,7 @@ class CategoryMealsFragment: Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentCategoryMealsBinding.inflate(inflater, container, false)
 
         showCategoryMeals()
