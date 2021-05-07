@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -39,8 +38,9 @@ class SearchFragment : Fragment() {
         }
 
         binding.searchTextInputEditText.doAfterTextChanged {
-            viewModel.query = it.toString()
+            viewModel.setQuery(it.toString())
         }
+        listenToSearch()
         showSearchResult()
         listenToGoToDetail()
 
@@ -50,6 +50,14 @@ class SearchFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun listenToSearch(){
+        lifecycleScope.launchWhenStarted {
+            viewModel.query.collect{
+                viewModel.searchMealsByName(it)
+            }
+        }
     }
 
     private fun showSearchResult(){
@@ -90,10 +98,6 @@ class SearchFragment : Fragment() {
                         Log.v("SEARCH", "ERRORR")
                     }
                 }
-            }
-
-            viewModel.meal.collect{
-
             }
         }
     }

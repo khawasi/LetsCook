@@ -4,4 +4,5 @@
     <string name="home">Home</string>
     <string name="search">Search</string>
     <string name="favorite">Favorite</string>
+    <string name="search_hint">Type here (More than 2 characters)</string>
 </resources>

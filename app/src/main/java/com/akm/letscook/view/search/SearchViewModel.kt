@@ -19,11 +19,8 @@ class SearchViewModel @Inject constructor(
     private val repo: IRepositoryTransaction
 ) : ViewModel() {
 
-    var query = ""
-    set(value) {
-        field = value
-        searchMealsByName(field)
-    }
+    private var _query = MutableStateFlow("")
+    val query = _query.asStateFlow()
 
     private var _meals = MutableStateFlow<Resource<List<Meal>>>(Resource.loading())
     val meals = _meals.asStateFlow()
@@ -35,7 +32,7 @@ class SearchViewModel @Inject constructor(
         searchMealsByName("")
     }
 
-    private fun searchMealsByName(query: String){
+    fun searchMealsByName(query: String){
         viewModelScope.launch {
             if (query.length > 2) {
                 delay(500)
@@ -54,6 +51,10 @@ class SearchViewModel @Inject constructor(
 
     fun navigatedToMealDetail(){
         _meal.value = null
+    }
+
+    fun setQuery(queryName: String){
+        _query.value = queryName
     }
 
 }

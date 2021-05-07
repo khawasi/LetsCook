@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupBottomNav(navController: NavController) {
         binding.mainBottomNavigationView.setupWithNavController(navController)
         binding.mainBottomNavigationView.setOnNavigationItemReselectedListener {
-            
+            //https://stackoverflow.com/a/60483719/5595098
         }
     }
 

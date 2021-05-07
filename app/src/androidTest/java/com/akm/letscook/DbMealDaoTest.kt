@@ -8,6 +8,8 @@ import com.akm.letscook.model.db.DbMeal
 import com.akm.letscook.model.db.LetsCookDatabase
 import com.akm.letscook.model.db.dao.DbMealDao
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -51,5 +53,23 @@ class DbMealDaoTest {
         assertThat(byId[0]).isEqualTo(dbMeal)
         val byName = dbMealDao.searchDbMealsByName("TestName")
         assertThat(byName[0]).isEqualTo(dbMeal)
+    }
+
+    @Test
+    @Throws(Exception::class)
+    fun writeAndReadInListBlocking() = runBlocking {
+        val dbMealMini = DbMeal(
+            23423,
+            "TestName",
+            "URL",
+        )
+        val categoryName = "Mexican"
+        dbMealDao.insertOrUpdate(dbMealMini)
+        dbMealDao.insertOrUpdateFromCategory(listOf(dbMealMini), categoryName)
+        val byCategoryName = dbMealDao.getAllMealsByCategory(categoryName).first()
+        assertThat(byCategoryName[0].id).isEqualTo(dbMealMini.id)
+        assertThat(byCategoryName[0].category).isNotEmpty()
+        assertThat(byCategoryName[0].category).isEqualTo(categoryName)
+        assertThat(byCategoryName[0].instructions).isEmpty()
     }
 }
