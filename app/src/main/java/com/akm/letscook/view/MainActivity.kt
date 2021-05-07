@@ -60,6 +60,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupBottomNav(navController: NavController) {
         binding.mainBottomNavigationView.setupWithNavController(navController)
+        binding.mainBottomNavigationView.setOnNavigationItemReselectedListener {
+            
+        }
     }
 
     private fun setupToolbar(
