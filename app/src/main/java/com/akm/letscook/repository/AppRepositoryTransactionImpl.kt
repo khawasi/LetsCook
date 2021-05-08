@@ -6,12 +6,10 @@ import com.akm.letscook.model.db.*
 import com.akm.letscook.model.domain.Category
 import com.akm.letscook.model.domain.Meal
 import com.akm.letscook.model.network.INetTransaction
-import com.akm.letscook.model.network.NetMeal
 import com.akm.letscook.util.*
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
-import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
@@ -23,77 +21,52 @@ class AppRepositoryTransactionImpl @Inject constructor(
 
     private val currDate: String = currDate()
 
-    private suspend fun getMealWithIngredientsFromNetwork(netMeals: List<NetMeal>): Meal {
-        val dbMealWithIngredients = DbMealWithIngredients()
-
-        dbMealWithIngredients.dbMeal = netMeals[0].mapToDbMeal(currDate)
-        dbMealWithIngredients.dbMealIngredients =
-            netMeals[0].ingredients.mapToDbMealIngredients(
-                netMeals[0].id
-            )
-        dbTransaction.upsertMeals(listOf(dbMealWithIngredients.dbMeal!!))
-        dbTransaction.updateDbMealIngredients(
-            netMeals[0].id,
-            dbMealWithIngredients.dbMealIngredients!!
-        )
-
-        return dbMealWithIngredients.mapToMealWithIngredients()
-    }
-
-    private suspend fun getRecommendedMealFromNetwork(): Meal {
-        return getMealWithIngredientsFromNetwork(
-            networkTransaction.getRecommendedMeal()
-        )
-    }
-
-    private suspend fun getMealByMealIdFromNetwork(mealId: Long): Meal {
-        return getMealWithIngredientsFromNetwork(
-            networkTransaction.getMealById(mealId)
-        )
-    }
-
     override suspend fun getRecommendedMeal(savedDate: String, mealId: Long): Flow<Resource<Meal>> =
         flow {
             emit(Resource.loading())
 
-            if (currDate == savedDate) {
+            var newMealId = mealId
+
+            if (currDate != savedDate) {
                 try {
-                    emit(
-                        Resource.success(
-                            dbTransaction
-                                .getMealWithIngredients(mealId)
-                                .mapToMealWithIngredients()
+                    val netMeals = networkTransaction.getRecommendedMeal()
+                    val dbMealWithIngredients = DbMealWithIngredients()
+
+                    dbMealWithIngredients.dbMeal = netMeals[0].mapToDbMeal(currDate)
+                    newMealId = netMeals[0].id
+                    dbMealWithIngredients.dbMealIngredients =
+                        netMeals[0].ingredients.mapToDbMealIngredients(
+                            newMealId
                         )
-                    )
-                } catch (e: IOException) {
-                    emit(Resource.error(e.localizedMessage!!, Meal()))
-                }
-            } else {
-                try {
-                    emit(
-                        Resource.success(
-                            getRecommendedMealFromNetwork()
-                        )
+                    dbTransaction.upsertMeals(listOf(dbMealWithIngredients.dbMeal!!))
+                    dbTransaction.updateDbMealIngredients(
+                        newMealId,
+                        dbMealWithIngredients.dbMealIngredients!!
                     )
                 } catch (e: Exception) {
-                    if (e is HttpException) {
-                        try {
-                            emit(
-                                Resource.error(
-                                    "Something is wrong with your connection\n" +
-                                            "Using the old data inside local storage if exist",
-                                    dbTransaction
-                                        .getMealWithIngredients(mealId)
-                                        .mapToMealWithIngredients()
-                                )
-                            )
-                        } catch (e2: IOException) {
-                            emit(Resource.error(e.localizedMessage!!, Meal()))
-                        }
-                    } else
-                        emit(Resource.error(e.localizedMessage!!, Meal()))
+                    emit(
+                        Resource.error(
+                            e.localizedMessage!! +
+                                    "\nSomething is wrong. Using the old data inside local storage if exist",
+                            Meal()
+                        )
+                    )
                 }
             }
+
+            try {
+                emit(Resource.loading())
+                emit(
+                    Resource.success(
+                        dbTransaction
+                            .getMealWithIngredients(newMealId)
+                            .mapToMealWithIngredients()
+                    )
+                )
+            } catch (e: Exception) {
+                emit(Resource.error(e.localizedMessage!!, Meal()))
+            }
+
         }.flowOn(ioDispatcher)
 
 
@@ -101,38 +74,31 @@ class AppRepositoryTransactionImpl @Inject constructor(
         flow {
             emit(Resource.loading())
 
-            if (currDate!=savedDate){
-                try{
+            if (currDate != savedDate) {
+                try {
                     val netCategories = networkTransaction.getCategories()
                     dbTransaction.upsertMiniCategories(netCategories.mapToDbCategories())
-                }
-                catch (e: Exception){
-                    if (e is HttpException){
-                        try {
-                            dbTransaction.getAllCategories().collect {
-                                emit(
-                                    Resource.error(
-                                        "Something is wrong when connecting to network\n" +
-                                                "Using the old data inside local storage if exist",
-                                        it.mapToCategories()
-                                    )
-                                )
-                            }
-                        } catch (e2: IOException) {
-                            emit(Resource.error(e2.localizedMessage!!, listOf(Category())))
-                        }
-                    } else {
-                        emit(Resource.error(e.localizedMessage!!, listOf(Category())))
-                    }
+                } catch (e: Exception) {
+                    emit(
+                        Resource.error(
+                            e.localizedMessage!! +
+                                    "\nSomething is wrong. Using the old data inside local storage if exist",
+                            listOf(Category())
+                        )
+                    )
                 }
             }
 
             try {
-                dbTransaction.getAllCategories().collect {
+                emit(Resource.loading())
+                dbTransaction.getAllCategories().map {
+                    it.sortedBy { dbCategory ->
+                        dbCategory.name
+                    }
+                }.collect {
                     emit(Resource.success(it.mapToCategories()))
                 }
-            }
-            catch (e: IOException){
+            } catch (e: IOException) {
                 emit(Resource.error(e.localizedMessage!!, listOf(Category())))
             }
 
@@ -143,42 +109,36 @@ class AppRepositoryTransactionImpl @Inject constructor(
 
             emit(Resource.loading())
 
-            if(savedDate!=currDate){
+            if (savedDate != currDate) {
                 try {
                     val netMeals = networkTransaction.getMealsByCategory(categoryName)
                     val dbMeals = netMeals.mapToDbMeals(category = categoryName)
                     dbTransaction.upsertMealsFromCategory(dbMeals, categoryName)
                     dbTransaction.updateCategoryLastAccessed(currDate, categoryName)
-                }
-                catch (e: Exception){
-                    if(e is HttpException){
-                        try{
-                            dbTransaction.getMealsByCategory(categoryName).collect {
-                                emit(
-                                    Resource.error(
-                                        "Something is wrong when connecting to network\n" +
-                                                "Using the old data inside local storage if exist",
-                                        it.mapToMealsFromDb()
-                                    )
-                                )
-                            }
-                        } catch (e2: IOException){
-                            emit(Resource.error(e2.localizedMessage!!, listOf(Meal())))
-                        }
-                    }
-                    else{
-                        emit(Resource.error(e.localizedMessage!!, listOf(Meal())))
-                    }
+                } catch (e: Exception) {
+
+                    emit(
+                        Resource.error(
+                            e.localizedMessage!! +
+                                    "\nSomething is wrong. Using the old data inside local storage if exist",
+                            listOf(Meal())
+                        )
+                    )
                 }
             }
 
-            try{
-                dbTransaction.getMealsByCategory(categoryName).collect {
+            try {
+                emit(Resource.loading())
+                dbTransaction.getMealsByCategory(categoryName).map {
+                    it.sortedBy { dbMeal ->
+                        dbMeal.name
+                    }
+                }.collect {
                     emit(
                         Resource.success(it.mapToMealsFromDb())
                     )
                 }
-            } catch (e: IOException){
+            } catch (e: IOException) {
                 emit(Resource.error(e.localizedMessage!!, listOf(Meal())))
             }
 
@@ -188,43 +148,45 @@ class AppRepositoryTransactionImpl @Inject constructor(
         flow {
             emit(Resource.loading())
 
-            if (currDate == savedDate) {
+            if (currDate != savedDate) {
                 try {
-                    emit(
-                        Resource.success(
-                            dbTransaction
-                                .getMealWithIngredients(mealId)
-                                .mapToMealWithIngredients()
+                    val netMeals = networkTransaction.getMealById(mealId)
+                    val dbMealWithIngredients = DbMealWithIngredients()
+
+                    dbMealWithIngredients.dbMeal = netMeals[0].mapToDbMeal(currDate)
+                    dbMealWithIngredients.dbMealIngredients =
+                        netMeals[0].ingredients.mapToDbMealIngredients(
+                            netMeals[0].id
                         )
-                    )
-                } catch (e: IOException) {
-                    emit(Resource.error(e.localizedMessage!!, Meal()))
-                }
-            } else {
-                try {
-                    emit(
-                        Resource.success(
-                            getMealByMealIdFromNetwork(mealId)
-                        )
+                    dbTransaction.upsertMeals(listOf(dbMealWithIngredients.dbMeal!!))
+                    dbTransaction.updateDbMealIngredients(
+                        netMeals[0].id,
+                        dbMealWithIngredients.dbMealIngredients!!
                     )
                 } catch (e: Exception) {
-                    if (e is HttpException) {
-                        try {
-                            emit(
-                                Resource.error(
-                                    "Something is wrong with your connection\n" +
-                                            "Using the old data inside local storage if exist",
-                                    dbTransaction
-                                        .getMealWithIngredients(mealId)
-                                        .mapToMealWithIngredients()
-                                )
-                            )
-                        } catch (e2: IOException) {
-                            emit(Resource.error(e.localizedMessage!!, Meal()))
-                        }
-                    } else
-                        emit(Resource.error(e.localizedMessage!!, Meal()))
+
+                    emit(
+                        Resource.error(
+                            e.localizedMessage!! +
+                                    "\nSomething is wrong. Using the old data inside local storage if exist",
+                            Meal()
+                        )
+                    )
+
                 }
+            }
+
+            try {
+                emit(Resource.loading())
+                emit(
+                    Resource.success(
+                        dbTransaction
+                            .getMealWithIngredients(mealId)
+                            .mapToMealWithIngredients()
+                    )
+                )
+            } catch (e: IOException) {
+                emit(Resource.error(e.localizedMessage!!, Meal()))
             }
 
         }.flowOn(ioDispatcher)
@@ -240,18 +202,23 @@ class AppRepositoryTransactionImpl @Inject constructor(
                     )
                 )
             } catch (e: Exception) {
-                if(e is HttpException) {
-                    try {
-                        Resource.error(
-                            "Something is wrong with your connection\n" +
-                                    "Using the old data inside local storage if exist",
-                            dbTransaction.searchMealsByName(query).mapToMealsFromDb()
+                try {
+                    dbTransaction.searchMealsByName(query).map {
+                        it.sortedBy { dbMeal ->
+                            dbMeal.name
+                        }
+                    }.collect{
+                        emit(
+                            Resource.error(
+                                e.localizedMessage!! +
+                                        "\nSomething is wrong. Using the old data inside local storage if exist",
+                                it.mapToMealsFromDb()
+                            )
                         )
-                    } catch (e: IOException) {
-                        Resource.error(e.localizedMessage!!, listOf(Meal()))
                     }
+                } catch (e2: Exception) {
+                    emit(Resource.error(e2.localizedMessage!!, listOf(Meal())))
                 }
-                else Resource.error(e.localizedMessage!!, listOf(Meal()))
             }
 
         }.flowOn(ioDispatcher)
@@ -260,7 +227,11 @@ class AppRepositoryTransactionImpl @Inject constructor(
         flow {
             emit(Resource.loading())
             try {
-                dbTransaction.getAllFavoriteDbMeals().collect {
+                dbTransaction.getAllFavoriteDbMeals().map {
+                    it.sortedBy { dbMeal ->
+                        dbMeal.name
+                    }
+                }.collect {
                     emit(Resource.success(it.mapToMealsFromDb()))
                 }
             } catch (e: IOException) {

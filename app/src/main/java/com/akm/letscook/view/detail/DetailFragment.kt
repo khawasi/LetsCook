@@ -2,8 +2,9 @@ package com.akm.letscook.view.detail
 
 import android.os.Bundle
 import android.util.Log
-import android.view.*
-import android.widget.Toast
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -16,6 +17,7 @@ import com.akm.letscook.R
 import com.akm.letscook.databinding.FragmentDetailBinding
 import com.akm.letscook.model.domain.Meal
 import com.akm.letscook.util.Resource
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 
@@ -25,7 +27,6 @@ class DetailFragment : Fragment() {
     private val viewModel: DetailViewModel by viewModels()
 
     private var _binding: FragmentDetailBinding? = null
-    private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,8 +42,8 @@ class DetailFragment : Fragment() {
 
         val navController = findNavController()
         val appBarConfiguration = AppBarConfiguration(navController.graph)
-        binding.detailToolbar.setupWithNavController(navController, appBarConfiguration)
-        binding.detailToolbar.menu.findItem(R.id.detail_action_favorite)
+        _binding!!.detailToolbar.setupWithNavController(navController, appBarConfiguration)
+        _binding!!.detailToolbar.menu.findItem(R.id.detail_action_favorite)
             .setOnMenuItemClickListener {
                 Log.v("DETAIL FAVORITE", "TEST!!!!")
                 viewModel.clickFavoriteMeal()
@@ -54,7 +55,7 @@ class DetailFragment : Fragment() {
         setDetail(adapter)
         updateFavorite()
 
-        return binding.root
+        return _binding!!.root
     }
 
     override fun onDestroyView() {
@@ -79,10 +80,8 @@ class DetailFragment : Fragment() {
                     }
 
                     Resource.Status.ERROR -> {
-                        Toast.makeText(context, resource.message, Toast.LENGTH_SHORT).show()
-                        val meal = resource.data!!
-                        if(meal.name.isNotEmpty()){
-                            bindMeal(meal, adapter)
+                        _binding?.let{
+                            Snackbar.make(it.root, resource.message!!, Snackbar.LENGTH_LONG).show()
                         }
                         Log.v("DETAIL", "ERROR")
                     }
@@ -92,9 +91,13 @@ class DetailFragment : Fragment() {
     }
 
     private fun bindMeal(meal: Meal, adapter: DetailIngredientsListAdapter){
-        binding.detailImageViewThumbnail.load(meal.thumbnailUrl)
-        binding.detailInstructionTextView.text = meal.instructions
-        binding.detailIngredientsRecyclerView.adapter = adapter
+        _binding?.let {
+            it.detailImageViewThumbnail.load(meal.thumbnailUrl)
+            it.detailImageViewThumbnail.contentDescription = "Image For ${meal.name}"
+            it.detailInstructionTextView.text = meal.instructions
+            it.detailIngredientsRecyclerView.adapter = adapter
+            it.detailCollapsingToolbarLayout.title = meal.name
+        }
         adapter.submitList(meal.ingredients)
     }
 
@@ -102,25 +105,27 @@ class DetailFragment : Fragment() {
         lifecycleScope.launchWhenStarted {
             viewModel.isFavorite.collect { isFavorite ->
                 Log.v("DETAIL FAVORITE", "UPDATE!!!!")
-                val favoriteItem = binding.detailToolbar.menu.findItem(R.id.detail_action_favorite)
-                favoriteItem.icon =
-                    if (isFavorite) {
-                        Log.v("DETAIL FAVORITE", "UPDATE IF")
-                        context?.let {
-                            ContextCompat.getDrawable(
-                                it,
-                                R.drawable.ic_round_favorite_filled_24
-                            )
+                _binding?.let{
+                    val favoriteItem = it.detailToolbar.menu.findItem(R.id.detail_action_favorite)
+                    favoriteItem.icon =
+                        if (isFavorite) {
+                            Log.v("DETAIL FAVORITE", "UPDATE IF")
+                            context?.let { context ->
+                                ContextCompat.getDrawable(
+                                    context,
+                                    R.drawable.ic_round_favorite_filled_24
+                                )
+                            }
+                        } else {
+                            Log.v("DETAIL FAVORITE", "UPDATE ELSE")
+                            context?.let { context ->
+                                ContextCompat.getDrawable(
+                                    context,
+                                    R.drawable.ic_baseline_favorite_border_24
+                                )
+                            }
                         }
-                    } else {
-                        Log.v("DETAIL FAVORITE", "UPDATE ELSE")
-                        context?.let {
-                            ContextCompat.getDrawable(
-                                it,
-                                R.drawable.ic_baseline_favorite_border_24
-                            )
-                        }
-                    }
+                }
             }
         }
     }

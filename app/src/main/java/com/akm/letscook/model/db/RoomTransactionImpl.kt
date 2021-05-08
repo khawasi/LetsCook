@@ -19,8 +19,8 @@ class RoomTransactionImpl @Inject constructor(
     override suspend fun getMealsByCategory(categoryName: String): Flow<List<DbMeal>> =
         dbMealDao.getAllMealsByCategory(categoryName).distinctUntilChanged()
 
-    override suspend fun searchMealsByName(name: String): List<DbMeal> =
-        dbMealDao.searchDbMealsByName(name)
+    override suspend fun searchMealsByName(name: String): Flow<List<DbMeal>> =
+        dbMealDao.searchDbMealsByName(name).distinctUntilChanged()
 
     override suspend fun upsertMeals(dbMeals: List<DbMeal>) {
         dbMealDao.insertOrUpdate(dbMeals)

@@ -22,8 +22,8 @@ abstract class DbMealDao: BaseDao<DbMeal>() {
     @Query("update dbmeal set name = :name, thumbnailUrl = :thumbnailUrl, category = :category where id = :id")
     abstract fun updateFromCategory(id: Long, name: String, thumbnailUrl: String, category: String)
 
-    @Query("select * from dbmeal where name = :name")
-    abstract fun searchDbMealsByName(name: String): List<DbMeal>
+    @Query("select * from dbmeal where name like '%' || :name || '%'")
+    abstract fun searchDbMealsByName(name: String): Flow<List<DbMeal>>
 
     @Transaction
     open fun insertOrUpdateFromCategory(objList: List<DbMeal>, category: String) {

@@ -24,6 +24,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        setTheme(R.style.Theme_LetsCook);
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -33,9 +35,11 @@ class MainActivity : AppCompatActivity() {
         navController = navHostFragment.navController
         navController.addOnDestinationChangedListener{ _, destination, _ ->
             binding.mainToolbar.visibility = View.VISIBLE
+
             if(binding.mainToolbar.menu.findItem(R.id.searchFragment) != null) {
                 binding.mainToolbar.menu.findItem(R.id.searchFragment).isVisible = true
             }
+
             if(destination.id == R.id.categoryFragment || destination.id == R.id.homeFragment || destination.id == R.id.favoriteFragment){
                 binding.mainBottomNavigationView.visibility = View.VISIBLE
             }

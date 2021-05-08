@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 interface IDbTransaction {
     suspend fun getMealById(mealId: Long): List<DbMeal>
     suspend fun getMealsByCategory(categoryName: String): Flow<List<DbMeal>>
-    suspend fun searchMealsByName(name: String): List<DbMeal>
+    suspend fun searchMealsByName(name: String): Flow<List<DbMeal>>
     suspend fun upsertMeals(dbMeals: List<DbMeal>)
     suspend fun upsertMealsFromCategory(dbMeals: List<DbMeal>, categoryName: String)
 
