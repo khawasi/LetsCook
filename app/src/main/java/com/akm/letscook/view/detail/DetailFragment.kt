@@ -1,5 +1,7 @@
 package com.akm.letscook.view.detail
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -27,6 +29,7 @@ class DetailFragment : Fragment() {
     private val viewModel: DetailViewModel by viewModels()
 
     private var _binding: FragmentDetailBinding? = null
+    private var shortAnimationDuration: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +43,8 @@ class DetailFragment : Fragment() {
     ): View {
         _binding = FragmentDetailBinding.inflate(inflater, container, false)
 
+        shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
+
         val navController = findNavController()
         val appBarConfiguration = AppBarConfiguration(navController.graph)
         _binding!!.detailToolbar.setupWithNavController(navController, appBarConfiguration)
@@ -50,12 +55,23 @@ class DetailFragment : Fragment() {
                 true
             }
 
+        return _binding!!.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        _binding!!.detailLinearLayout.visibility = View.GONE
+        _binding!!.detailImageViewThumbnail.visibility = View.GONE
+        _binding!!.detailCollapsingToolbarLayout.title = ""
+        _binding!!.detailToolbar.title = ""
+
+
         val adapter = DetailIngredientsListAdapter()
 
         setDetail(adapter)
         updateFavorite()
 
-        return _binding!!.root
     }
 
     override fun onDestroyView() {
@@ -76,13 +92,15 @@ class DetailFragment : Fragment() {
 
                         val meal = resource.data!!
                         bindMeal(meal, adapter)
-
+                        showContent()
+                        hideLoading()
                     }
 
                     Resource.Status.ERROR -> {
                         _binding?.let{
                             Snackbar.make(it.root, resource.message!!, Snackbar.LENGTH_LONG).show()
                         }
+                        hideLoading()
                         Log.v("DETAIL", "ERROR")
                     }
                 }
@@ -127,6 +145,64 @@ class DetailFragment : Fragment() {
                         }
                 }
             }
+        }
+    }
+
+    private fun showContent(){
+        _binding?.let {
+            it.detailImageViewThumbnail.apply {
+                // Set the content view to 0% opacity but visible, so that it is visible
+                // (but fully transparent) during the animation.
+                alpha = 0f
+                visibility = View.VISIBLE
+
+                // Animate the content view to 100% opacity, and clear any animation
+                // listener set on the view.
+                animate()
+                    .alpha(1f)
+                    .setListener(null)
+                    .duration = shortAnimationDuration.toLong()
+
+            }
+            it.detailLinearLayout.apply {
+                // Set the content view to 0% opacity but visible, so that it is visible
+                // (but fully transparent) during the animation.
+                alpha = 0f
+                visibility = View.VISIBLE
+
+                // Animate the content view to 100% opacity, and clear any animation
+                // listener set on the view.
+                animate()
+                    .alpha(1f)
+                    .setListener(null)
+                    .duration = shortAnimationDuration.toLong()
+
+            }
+        }
+    }
+
+    private fun hideLoading(){
+        // Animate the loading view to 0% opacity. After the animation ends,
+        // set its visibility to GONE as an optimization step (it won't
+        // participate in layout passes, etc.)
+        _binding?.let {
+            it.detailShimmerLayoutToolbar.animate()
+                .alpha(0f)
+                .setListener(object : AnimatorListenerAdapter(){
+                    override fun onAnimationEnd(animation: Animator?) {
+                        it.detailShimmerLayoutToolbar.visibility = View.GONE
+                    }
+                })
+                .duration = shortAnimationDuration.toLong()
+
+            it.detailShimmerLayoutContent.animate()
+                .alpha(0f)
+                .setListener(object : AnimatorListenerAdapter(){
+                    override fun onAnimationEnd(animation: Animator?) {
+                        it.detailShimmerLayoutContent.visibility = View.GONE
+                    }
+                })
+                .duration = shortAnimationDuration.toLong()
         }
     }
 

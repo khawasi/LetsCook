@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    android:id="@+id/detail_parent_coor_layout"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/detail_parent_coor_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -19,29 +18,41 @@
             android:id="@+id/detail_collapsing_toolbar_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:expandedTitleGravity="bottom"
             app:contentScrim="?attr/colorPrimary"
+            app:expandedTitleGravity="bottom"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/detail_shimmer_layout_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:shimmer_auto_start="true">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:background="@android:color/darker_gray" />
+
+            </com.facebook.shimmer.ShimmerFrameLayout>
 
             <ImageView
                 android:id="@+id/detail_image_view_thumbnail"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                app:layout_collapseMode="parallax"
-                android:scaleType="centerCrop"/>
+                android:scaleType="centerCrop"
+                app:layout_collapseMode="parallax" />
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/detail_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:menu="@menu/detail_toolbar"
                 app:layout_collapseMode="pin"
+                app:menu="@menu/detail_toolbar"
                 app:popupTheme="@style/ThemeOverlay.AppCompat" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
-
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/detail_nested_scroll_view"
@@ -49,27 +60,61 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <LinearLayout
+        <FrameLayout
+            android:id="@+id/detail_frame_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="8dp">
+            android:layout_height="match_parent">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/detail_ingredients_recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="3"
-                android:layout_marginBottom="4dp"/>
-
-            <TextView
-                android:id="@+id/detail_instruction_text_view"
+            <LinearLayout
+                android:id="@+id/detail_linear_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                style="@style/TextAppearance.MaterialComponents.Body1"/>
-        </LinearLayout>
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/detail_ingredients_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:nestedScrollingEnabled="false"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="3" />
+
+                <TextView
+                    android:id="@+id/detail_instruction_text_view"
+                    style="@style/TextAppearance.MaterialComponents.Body1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </LinearLayout>
+
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/detail_shimmer_layout_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:shimmer_auto_start="true"
+                android:layout_marginTop="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="100dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@android:color/darker_gray" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:background="@android:color/darker_gray" />
+
+                </LinearLayout>
+
+            </com.facebook.shimmer.ShimmerFrameLayout>
+        </FrameLayout>
 
     </androidx.core.widget.NestedScrollView>
 

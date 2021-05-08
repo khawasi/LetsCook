@@ -115,31 +115,6 @@ class HomeFragment : Fragment() {
                 view.findNavController().navigate(action, extras)
             }
         }
-//        binding.homeTextViewName.text = meal.name
-//        binding.homeImageViewThumbnail.apply {
-//            load(meal.thumbnailUrl) {
-//                allowHardware(false)
-//                transformations(RoundedCornersTransformation(4f, 4f, 4f, 4f))
-//            }
-//            transitionName = meal.id.toString()
-////                            memoryCacheKey = metadata!!.memoryCacheKey.toString()
-//        }
-//
-//        binding.homeLinearLayout.setOnClickListener { view ->
-//
-//            memoryCacheKey =
-//                binding.homeImageViewThumbnail.metadata!!.memoryCacheKey.toString()
-//
-//            val extras = FragmentNavigatorExtras(
-//                binding.homeImageViewThumbnail to meal.id.toString()
-//            )
-//
-//            val action = NavigationGraphDirections.actionGlobalDetailFragment(
-//                meal.id,
-//                meal.lastAccessed
-//            )
-//            view.findNavController().navigate(action, extras)
-//        }
     }
 
     private fun showCardView() {
@@ -159,20 +134,6 @@ class HomeFragment : Fragment() {
 
             }
         }
-//        binding.homeCardView.apply {
-//            // Set the content view to 0% opacity but visible, so that it is visible
-//            // (but fully transparent) during the animation.
-//            alpha = 0f
-//            visibility = View.VISIBLE
-//
-//            // Animate the content view to 100% opacity, and clear any animation
-//            // listener set on the view.
-//            animate()
-//                .alpha(1f)
-//                .setListener(null)
-//                .duration = shortAnimationDuration.toLong()
-//
-//        }
     }
 
     private fun hideProgressBar() {
@@ -189,14 +150,6 @@ class HomeFragment : Fragment() {
                 })
                 .duration = shortAnimationDuration.toLong()
         }
-//        binding.homeProgressBar.animate()
-//            .alpha(0f)
-//            .setListener(object : AnimatorListenerAdapter(){
-//                override fun onAnimationEnd(animation: Animator?) {
-//                    binding.homeProgressBar.visibility = View.GONE
-//                }
-//            })
-//            .duration = shortAnimationDuration.toLong()
     }
 
 }
