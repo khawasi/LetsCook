@@ -180,11 +180,11 @@ class HomeFragment : Fragment() {
         // set its visibility to GONE as an optimization step (it won't
         // participate in layout passes, etc.)
         _binding?.let {
-            it.homeProgressBar.animate()
+            it.homeShimmerLayout.animate()
                 .alpha(0f)
                 .setListener(object : AnimatorListenerAdapter(){
                     override fun onAnimationEnd(animation: Animator?) {
-                        it.homeProgressBar.visibility = View.GONE
+                        it.homeShimmerLayout.visibility = View.GONE
                     }
                 })
                 .duration = shortAnimationDuration.toLong()

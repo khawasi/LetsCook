@@ -139,11 +139,11 @@ class CategoryMealsFragment: Fragment() {
 
     private fun hideProgressBar() {
         _binding?.let {
-            it.categoryMealsProgressBar.animate()
+            it.categoryMealsShimmerLayout.animate()
                 .alpha(0f)
                 .setListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
-                        it.categoryMealsProgressBar.visibility = View.GONE
+                        it.categoryMealsShimmerLayout.visibility = View.GONE
                     }
                 })
                 .duration = shortAnimationDuration.toLong()

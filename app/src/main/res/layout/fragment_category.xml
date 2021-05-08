@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:paddingStart="8dp"
     android:paddingEnd="8dp">
@@ -12,11 +12,24 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <ProgressBar
-        android:id="@+id/category_progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="?android:progressBarStyleLarge"
-        android:layout_gravity="center"/>
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/category_shimmer_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:shimmer_auto_start="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <include layout="@layout/item_list_vertical_shimmer"/>
+            <include layout="@layout/item_list_vertical_shimmer"/>
+            <include layout="@layout/item_list_vertical_shimmer"/>
+            <include layout="@layout/item_list_vertical_shimmer"/>
+            <include layout="@layout/item_list_vertical_shimmer"/>
+        </LinearLayout>
+
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
 </FrameLayout>

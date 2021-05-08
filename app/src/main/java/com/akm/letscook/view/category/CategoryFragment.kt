@@ -129,11 +129,11 @@ class CategoryFragment : Fragment() {
 
     private fun hideProgressBar() {
         _binding?.let {
-            it.categoryProgressBar.animate()
+            it.categoryShimmerLayout.animate()
                 .alpha(0f)
                 .setListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
-                        it.categoryProgressBar.visibility = View.GONE
+                        it.categoryShimmerLayout.visibility = View.GONE
                     }
                 })
                 .duration = shortAnimationDuration.toLong()
