@@ -36,10 +36,10 @@ class DetailIngredientsListAdapter:
 
     companion object DiffCallback: DiffUtil.ItemCallback<MealIngredient>(){
         override fun areItemsTheSame(oldItem: MealIngredient, newItem: MealIngredient) =
-            oldItem == newItem
+            oldItem.name == newItem.name
 
         override fun areContentsTheSame(oldItem: MealIngredient, newItem: MealIngredient) =
-            oldItem.name == newItem.name && oldItem.measurement == newItem.measurement
+            oldItem == newItem
 
     }
 

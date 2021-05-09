@@ -64,13 +64,12 @@ class SearchFragment : Fragment() {
 
     private fun showSearchResult() {
 
-        val adapter = MealListAdapter(
-            MealListAdapter.OnClickListener {
-                lifecycleScope.launchWhenStarted {
-                    viewModel.setMealForDetail(it)
-                }
+        val adapter = MealListAdapter {
+            lifecycleScope.launchWhenStarted {
+                viewModel.setMealForDetail(it)
             }
-        )
+        }
+
 
         _binding?.let {
             it.searchRecyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -93,7 +92,7 @@ class SearchFragment : Fragment() {
 
                     }
                     Resource.Status.ERROR -> {
-                        _binding?.let{
+                        _binding?.let {
                             Snackbar.make(it.root, resource.message!!, Snackbar.LENGTH_LONG).show()
                         }
                         val meals = resource.data!!

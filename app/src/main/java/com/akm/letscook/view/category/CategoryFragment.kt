@@ -53,11 +53,11 @@ class CategoryFragment : Fragment() {
         _binding = null
     }
 
-    private fun goToCategoryMeals(){
+    private fun goToCategoryMeals() {
         lifecycleScope.launchWhenStarted {
             Log.v("CATEGORY", "COLLECT")
             viewModel.category.collect {
-                if(it != null) {
+                if (it != null) {
                     this@CategoryFragment.findNavController().navigate(
                         CategoryFragmentDirections.actionCategoryFragmentToCategoryMealsFragment(
                             categoryName = it.name,
@@ -70,14 +70,12 @@ class CategoryFragment : Fragment() {
         }
     }
 
-    private fun setTheCategories(){
-        val adapter = CategoryListAdapter(
-            CategoryListAdapter.OnClickListener{
-                lifecycleScope.launchWhenStarted {
-                    viewModel.displayCategoryMeals(it)
-                }
+    private fun setTheCategories() {
+        val adapter = CategoryListAdapter {
+            lifecycleScope.launchWhenStarted {
+                viewModel.displayCategoryMeals(it)
             }
-        )
+        }
 
         _binding?.let {
             it.categoryRecyclerView.layoutManager = LinearLayoutManager(requireContext())

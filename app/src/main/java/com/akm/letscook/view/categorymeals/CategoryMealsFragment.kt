@@ -57,13 +57,11 @@ class CategoryMealsFragment: Fragment() {
     }
 
     private fun setCategoryMeals(){
-        val adapter = CategoryMealsListAdapter(
-            CategoryMealsListAdapter.OnClickListener { meal ->
-                lifecycleScope.launchWhenCreated {
-                    viewModel.setMealForDetail(meal)
-                }
+        val adapter = CategoryMealsListAdapter { meal ->
+            lifecycleScope.launchWhenCreated {
+                viewModel.setMealForDetail(meal)
             }
-        )
+        }
 
         _binding?.let{
             it.categoryMealsRecyclerView.apply {

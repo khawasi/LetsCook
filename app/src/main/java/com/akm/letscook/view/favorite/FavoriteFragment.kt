@@ -44,13 +44,11 @@ class FavoriteFragment : Fragment() {
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
 
-        val adapter = MealListAdapter(
-            MealListAdapter.OnClickListener {
-                lifecycleScope.launchWhenStarted {
-                    viewModel.setMealForDetail(it)
-                }
+        val adapter = MealListAdapter {
+            lifecycleScope.launchWhenStarted {
+                viewModel.setMealForDetail(it)
             }
-        )
+        }
 
         setFavoriteMeals(adapter)
         listenToGoToDetail()
