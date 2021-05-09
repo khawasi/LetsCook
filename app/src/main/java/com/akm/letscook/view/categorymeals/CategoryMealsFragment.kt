@@ -12,11 +12,14 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.akm.letscook.NavigationGraphDirections
+import com.akm.letscook.R
 import com.akm.letscook.databinding.FragmentCategoryMealsBinding
+import com.akm.letscook.databinding.LayoutToolbarBinding
 import com.akm.letscook.util.Resource
-import com.akm.letscook.view.MainActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -28,6 +31,7 @@ class CategoryMealsFragment: Fragment() {
     private val fragmentArgs: CategoryMealsFragmentArgs by navArgs()
 
     private var _binding : FragmentCategoryMealsBinding? = null
+    private var _toolbarBinding: LayoutToolbarBinding? = null
 
     private var shortAnimationDuration: Int = 0
 
@@ -37,8 +41,7 @@ class CategoryMealsFragment: Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCategoryMealsBinding.inflate(inflater, container, false)
-
-        (activity as MainActivity).supportActionBar?.title = fragmentArgs.categoryName
+        _toolbarBinding = _binding!!.categoryMealsToolbar
 
         _binding!!.categoryMealsRecyclerView.visibility = View.GONE
 
@@ -51,19 +54,30 @@ class CategoryMealsFragment: Fragment() {
         return _binding!!.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _toolbarBinding?.let {
+            val navController = findNavController()
+            val appBarConfiguration = AppBarConfiguration(navController.graph)
+            it.root.setupWithNavController(navController, appBarConfiguration)
+            it.root.title = fragmentArgs.categoryName
+        }
+        activity?.findViewById<BottomNavigationView>(R.id.main_bottom_navigation_view)?.visibility = View.VISIBLE
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        _toolbarBinding = null
     }
 
-    private fun setCategoryMeals(){
-        val adapter = CategoryMealsListAdapter(
-            CategoryMealsListAdapter.OnClickListener { meal ->
-                lifecycleScope.launchWhenCreated {
-                    viewModel.setMealForDetail(meal)
-                }
+    private fun setCategoryMeals() {
+
+        val adapter = CategoryMealsListAdapter { meal ->
+            lifecycleScope.launchWhenCreated {
+                viewModel.setMealForDetail(meal)
             }
-        )
+        }
 
         _binding?.let{
             it.categoryMealsRecyclerView.apply {
@@ -108,7 +122,7 @@ class CategoryMealsFragment: Fragment() {
             viewModel.meal.collect { meal ->
                 if (meal!=null){
                     this@CategoryMealsFragment.findNavController().navigate(
-                        NavigationGraphDirections.actionGlobalDetailFragment(
+                        CategoryMealsFragmentDirections.actionCategoryMealsFragmentToDetailFragmentInCategory(
                             meal.id,
                             meal.lastAccessed
                         )

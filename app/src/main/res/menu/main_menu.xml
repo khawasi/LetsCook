@@ -2,17 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/categoryFragment"
+        android:id="@+id/navigation_graph_category"
         android:icon="@drawable/ic_round_food_bank_24"
         android:title="@string/category"/>
 
     <item
-        android:id="@+id/homeFragment"
+        android:id="@+id/navigation_graph_home"
         android:icon="@drawable/ic_round_home_24"
         android:title="@string/home"/>
 
     <item
-        android:id="@+id/favoriteFragment"
+        android:id="@+id/navigation_graph_favorite"
         android:icon="@drawable/ic_round_favorite_filled_24"
         android:title="@string/favorite"/>
 

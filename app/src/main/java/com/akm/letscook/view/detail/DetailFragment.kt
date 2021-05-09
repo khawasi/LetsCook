@@ -3,6 +3,7 @@ package com.akm.letscook.view.detail
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.os.Bundle
+import android.transition.TransitionInflater
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -14,11 +15,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
-import coil.load
 import com.akm.letscook.R
 import com.akm.letscook.databinding.FragmentDetailBinding
 import com.akm.letscook.model.domain.Meal
 import com.akm.letscook.util.Resource
+import com.bumptech.glide.Glide
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -42,6 +44,8 @@ class DetailFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentDetailBinding.inflate(inflater, container, false)
+
+        activity?.findViewById<BottomNavigationView>(R.id.main_bottom_navigation_view)?.visibility = View.GONE
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
 
@@ -71,7 +75,6 @@ class DetailFragment : Fragment() {
 
         setDetail(adapter)
         updateFavorite()
-
     }
 
     override fun onDestroyView() {
@@ -110,7 +113,12 @@ class DetailFragment : Fragment() {
 
     private fun bindMeal(meal: Meal, adapter: DetailIngredientsListAdapter){
         _binding?.let {
-            it.detailImageViewThumbnail.load(meal.thumbnailUrl)
+            it.detailImageViewThumbnail.apply {
+                Glide.with(this)
+                    .load(meal.thumbnailUrl)
+                    .error(ContextCompat.getDrawable(context, R.drawable.ic_baseline_error_outline_24))
+                    .into(this)
+            }
             it.detailImageViewThumbnail.contentDescription = "Image For ${meal.name}"
             it.detailInstructionTextView.text = meal.instructions
             it.detailIngredientsRecyclerView.adapter = adapter

@@ -12,15 +12,16 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorExtras
-import coil.load
-import coil.metadata
-import coil.transform.RoundedCornersTransformation
-import com.akm.letscook.NavigationGraphDirections
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupWithNavController
 import com.akm.letscook.R
 import com.akm.letscook.databinding.FragmentHomeBinding
+import com.akm.letscook.databinding.LayoutToolbarBinding
 import com.akm.letscook.model.domain.Meal
 import com.akm.letscook.util.Resource
-import com.akm.letscook.view.MainActivity
+import com.bumptech.glide.Glide
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -34,6 +35,7 @@ class HomeFragment : Fragment() {
     private val homeViewModel: HomeViewModel by viewModels()
 
     private var _binding: FragmentHomeBinding? = null
+    private var _toolbarBinding: LayoutToolbarBinding? = null
 
     private var shortAnimationDuration: Int = 0
 
@@ -43,8 +45,7 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-
-        (activity as MainActivity).supportActionBar?.title = getString(R.string.app_name)
+        _toolbarBinding = _binding!!.homeToolbar
 
         _binding!!.homeCardView.visibility = View.GONE
 
@@ -82,33 +83,46 @@ class HomeFragment : Fragment() {
         return _binding!!.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _toolbarBinding?.let {
+            val navController = findNavController()
+            val appBarConfiguration = AppBarConfiguration(navController.graph)
+            it.root.setupWithNavController(navController, appBarConfiguration)
+            it.root.inflateMenu(R.menu.menu_toolbar)
+            it.root.menu.findItem(R.id.navigation_graph_search)
+                .setOnMenuItemClickListener {
+                    view.findNavController().navigate(
+                        HomeFragmentDirections.actionHomeFragmentToNavigationGraphSearch()
+                    )
+                    true
+                }
+            it.root.title = getString(R.string.app_name)
+        }
+        activity?.findViewById<BottomNavigationView>(R.id.main_bottom_navigation_view)?.visibility = View.VISIBLE
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        _toolbarBinding = null
     }
 
-    private fun setCardView(meal: Meal){
-//        var memoryCacheKey = ""
+    private fun setCardView(meal: Meal) {
         _binding?.let {
             it.homeTextViewName.text = meal.name
             it.homeImageViewThumbnail.apply {
-                load(meal.thumbnailUrl) {
-                    allowHardware(false)
-                    transformations(RoundedCornersTransformation(4f, 4f, 4f, 4f))
-                }
+                Glide.with(this).load(meal.thumbnailUrl).into(this)
                 transitionName = meal.id.toString()
-//                            memoryCacheKey = metadata!!.memoryCacheKey.toString()
             }
             it.homeLinearLayout.setOnClickListener { view ->
 
-//                memoryCacheKey =
-//                    it.homeImageViewThumbnail.metadata!!.memoryCacheKey.toString()
 
                 val extras = FragmentNavigatorExtras(
                     it.homeImageViewThumbnail to meal.id.toString()
                 )
 
-                val action = NavigationGraphDirections.actionGlobalDetailFragment(
+                val action = HomeFragmentDirections.actionHomeFragmentToDetailFragmentInHome(
                     meal.id,
                     meal.lastAccessed
                 )
@@ -143,7 +157,7 @@ class HomeFragment : Fragment() {
         _binding?.let {
             it.homeShimmerLayout.animate()
                 .alpha(0f)
-                .setListener(object : AnimatorListenerAdapter(){
+                .setListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
                         it.homeShimmerLayout.visibility = View.GONE
                     }

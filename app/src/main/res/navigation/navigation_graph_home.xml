@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation_graph_home"
+    app:startDestination="@id/homeFragment">
+
+    <include app:graph="@navigation/navigation_graph_search"/>
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.akm.letscook.view.home.HomeFragment"
+        android:label="HomeFragment" >
+        <action
+            android:id="@+id/action_homeFragment_to_detailFragmentInHome"
+            app:destination="@id/detailFragmentInHome" />
+        <action
+            android:id="@+id/action_homeFragment_to_navigation_graph_search"
+            app:destination="@id/navigation_graph_search" />
+    </fragment>
+    <fragment
+        android:id="@+id/detailFragmentInHome"
+        android:name="com.akm.letscook.view.detail.DetailFragment"
+        android:label="DetailFragment" >
+        <argument
+            android:name="mealId"
+            app:argType="long" />
+        <argument
+            android:name="savedDate"
+            app:argType="string" />
+    </fragment>
+</navigation>

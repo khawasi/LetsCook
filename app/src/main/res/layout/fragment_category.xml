@@ -1,35 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:paddingStart="8dp"
-    android:paddingEnd="8dp">
+    android:orientation="vertical">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/category_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+    <include
+        android:id="@+id/category_toolbar"
+        layout="@layout/layout_toolbar"/>
 
-    <com.facebook.shimmer.ShimmerFrameLayout
-        android:id="@+id/category_shimmer_Layout"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:shimmer_auto_start="true">
+        android:orientation="vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
 
-        <LinearLayout
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/category_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/category_shimmer_Layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            app:shimmer_auto_start="true">
 
-            <include layout="@layout/item_list_vertical_shimmer"/>
-            <include layout="@layout/item_list_vertical_shimmer"/>
-            <include layout="@layout/item_list_vertical_shimmer"/>
-            <include layout="@layout/item_list_vertical_shimmer"/>
-            <include layout="@layout/item_list_vertical_shimmer"/>
-        </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-    </com.facebook.shimmer.ShimmerFrameLayout>
+                <include layout="@layout/item_list_vertical_shimmer" />
 
-</FrameLayout>
+                <include layout="@layout/item_list_vertical_shimmer" />
+
+                <include layout="@layout/item_list_vertical_shimmer" />
+
+                <include layout="@layout/item_list_vertical_shimmer" />
+
+                <include layout="@layout/item_list_vertical_shimmer" />
+            </LinearLayout>
+
+        </com.facebook.shimmer.ShimmerFrameLayout>
+
+    </FrameLayout>
+</LinearLayout>
