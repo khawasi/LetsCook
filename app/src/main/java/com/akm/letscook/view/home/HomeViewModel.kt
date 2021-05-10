@@ -10,6 +10,7 @@ import com.akm.letscook.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,8 +22,7 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var _meal = MutableStateFlow<Resource<Meal>>(Resource.loading())
-    val meal: StateFlow<Resource<Meal>>
-        get() = _meal
+    val meal = _meal.asStateFlow()
 
     init {
         getRecommendedMeal(

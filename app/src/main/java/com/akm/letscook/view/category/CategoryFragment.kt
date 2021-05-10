@@ -18,11 +18,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.akm.letscook.R
 import com.akm.letscook.databinding.FragmentCategoryBinding
 import com.akm.letscook.databinding.LayoutToolbarBinding
+import com.akm.letscook.model.domain.Category
 import com.akm.letscook.util.Resource
-import com.akm.letscook.view.MainActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
@@ -32,6 +33,7 @@ class CategoryFragment : Fragment() {
 
     private var _binding: FragmentCategoryBinding? = null
     private var _toolbarBinding: LayoutToolbarBinding? = null
+    private var _uiStateJob: Job? = null
 
     private var shortAnimationDuration: Int = 0
 
@@ -43,21 +45,39 @@ class CategoryFragment : Fragment() {
         _binding = FragmentCategoryBinding.inflate(inflater, container, false)
         _toolbarBinding = _binding!!.categoryToolbar
 
-        (activity as MainActivity).supportActionBar?.title = "Category"
-
         _binding!!.categoryRecyclerView.visibility = View.GONE
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
-
-        setTheCategories()
-
-        goToCategoryMeals()
 
         return _binding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setToolbar(view)
+
+        setTheCategories()
+
+        activity?.findViewById<BottomNavigationView>(R.id.main_bottom_navigation_view)?.visibility = View.VISIBLE
+    }
+
+    override fun onDestroyView() {
+        _binding = null
+        _toolbarBinding = null
+        _uiStateJob?.cancel()
+        super.onDestroyView()
+    }
+
+    private fun goToCategoryMeals(category: Category) {
+        this.findNavController().navigate(
+            CategoryFragmentDirections.actionCategoryFragmentToCategoryMealsFragment(
+                categoryName = category.name,
+                savedDate = category.lastAccessed
+            )
+        )
+    }
+
+    private fun setToolbar(view: View){
         _toolbarBinding?.let {
             val navController = findNavController()
             val appBarConfiguration = AppBarConfiguration(navController.graph)
@@ -72,37 +92,11 @@ class CategoryFragment : Fragment() {
                 }
             it.root.title = getString(R.string.category)
         }
-        activity?.findViewById<BottomNavigationView>(R.id.main_bottom_navigation_view)?.visibility = View.VISIBLE
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-        _toolbarBinding = null
-    }
-
-    private fun goToCategoryMeals(){
-        lifecycleScope.launchWhenStarted {
-            Log.v("CATEGORY", "COLLECT")
-            viewModel.category.collect {
-                if(it != null) {
-                    this@CategoryFragment.findNavController().navigate(
-                        CategoryFragmentDirections.actionCategoryFragmentToCategoryMealsFragment(
-                            categoryName = it.name,
-                            savedDate = it.lastAccessed
-                        )
-                    )
-                    viewModel.navigatedToCategoryMeals()
-                }
-            }
-        }
-    }
-
-    private fun setTheCategories(){
-        val adapter = CategoryListAdapter{
-            lifecycleScope.launchWhenStarted {
-                viewModel.displayCategoryMeals(it)
-            }
+    private fun setTheCategories() {
+        val adapter = CategoryListAdapter {
+            goToCategoryMeals(it)
         }
 
         _binding?.let {
@@ -110,7 +104,7 @@ class CategoryFragment : Fragment() {
             it.categoryRecyclerView.adapter = adapter
         }
 
-        lifecycleScope.launchWhenStarted {
+        _uiStateJob = lifecycleScope.launchWhenStarted {
             viewModel.categories.collect { resource ->
                 when (resource.status) {
                     Resource.Status.LOADING -> {

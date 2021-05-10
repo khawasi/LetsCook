@@ -16,11 +16,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.akm.letscook.R
 import com.akm.letscook.databinding.FragmentSearchBinding
+import com.akm.letscook.model.domain.Meal
 import com.akm.letscook.util.Resource
 import com.akm.letscook.view.rvadapter.MealListAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
@@ -29,6 +31,8 @@ class SearchFragment : Fragment() {
     private val viewModel: SearchViewModel by viewModels()
 
     private var _binding: FragmentSearchBinding? = null
+    private var _uiContentJob: Job? = null
+    private var _uiQueryJob: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,32 +42,37 @@ class SearchFragment : Fragment() {
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
         activity?.findViewById<BottomNavigationView>(R.id.main_bottom_navigation_view)?.visibility =
             View.GONE
-        _binding!!.searchTextInputLayout.setStartIconOnClickListener {
-            findNavController().popBackStack()
-        }
-
-        _binding!!.searchTextInputEditText.doAfterTextChanged {
-            viewModel.setQuery(it.toString())
-        }
-
         return _binding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        _binding?.let {
+
+            it.searchTextInputLayout.setStartIconOnClickListener {
+                findNavController().popBackStack()
+            }
+
+            it.searchTextInputEditText.doAfterTextChanged {
+                viewModel.setQuery(it.toString())
+            }
+
+        }
+
         listenToSearch()
         showSearchResult()
-        listenToGoToDetail()
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         _binding = null
+        _uiContentJob?.cancel()
+        _uiQueryJob?.cancel()
+        super.onDestroyView()
     }
 
     private fun listenToSearch() {
-        lifecycleScope.launchWhenStarted {
+        _uiQueryJob = lifecycleScope.launchWhenStarted {
             viewModel.query.collect {
                 viewModel.searchMealsByName(it)
             }
@@ -73,9 +82,7 @@ class SearchFragment : Fragment() {
     private fun showSearchResult() {
 
         val adapter = MealListAdapter { meal ->
-            lifecycleScope.launchWhenStarted {
-                viewModel.setMealForDetail(meal)
-            }
+            goToDetail(meal)
         }
 
         _binding?.let {
@@ -83,8 +90,7 @@ class SearchFragment : Fragment() {
             it.searchRecyclerView.adapter = adapter
         }
 
-
-        lifecycleScope.launchWhenStarted {
+        _uiContentJob = lifecycleScope.launchWhenStarted {
             viewModel.meals.collect { resource ->
                 when (resource.status) {
                     Resource.Status.LOADING -> {
@@ -113,19 +119,12 @@ class SearchFragment : Fragment() {
         }
     }
 
-    private fun listenToGoToDetail() {
-        lifecycleScope.launchWhenCreated {
-            viewModel.meal.collect { meal ->
-                if (meal != null) {
-                    this@SearchFragment.findNavController().navigate(
-                        SearchFragmentDirections.actionSearchFragmentToDetailFragment(
-                            meal.id,
-                            meal.lastAccessed
-                        )
-                    )
-                    viewModel.navigatedToMealDetail()
-                }
-            }
-        }
+    private fun goToDetail(meal: Meal) {
+        this.findNavController().navigate(
+            SearchFragmentDirections.actionSearchFragmentToDetailFragment(
+                meal.id,
+                meal.lastAccessed
+            )
+        )
     }
 }

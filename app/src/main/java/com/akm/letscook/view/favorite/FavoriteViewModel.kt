@@ -21,9 +21,6 @@ class FavoriteViewModel @Inject constructor(
     private var _meals = MutableStateFlow<Resource<List<Meal>>>(Resource.loading())
     val meals = _meals.asStateFlow()
 
-    private var _meal = MutableStateFlow<Meal?>(null)
-    val meal = _meal.asStateFlow()
-
     private fun getFavoriteMeals() {
         viewModelScope.launch {
             repo.getFavoriteMeals().collect {
@@ -34,13 +31,5 @@ class FavoriteViewModel @Inject constructor(
 
     init {
         getFavoriteMeals()
-    }
-
-    suspend fun setMealForDetail(meal: Meal){
-        _meal.emit(meal)
-    }
-
-    fun navigatedToMealDetail(){
-        _meal.value = null
     }
 }

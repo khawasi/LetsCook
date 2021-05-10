@@ -11,8 +11,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.FragmentNavigator
-import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
@@ -20,13 +18,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.akm.letscook.R
 import com.akm.letscook.databinding.FragmentFavoriteBinding
 import com.akm.letscook.databinding.LayoutToolbarBinding
+import com.akm.letscook.model.domain.Meal
 import com.akm.letscook.util.Resource
-import com.akm.letscook.view.MainActivity
-import com.akm.letscook.view.home.HomeFragmentDirections
 import com.akm.letscook.view.rvadapter.MealListAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
@@ -36,9 +34,9 @@ class FavoriteFragment : Fragment() {
 
     private var _binding: FragmentFavoriteBinding? = null
     private var _toolbarBinding: LayoutToolbarBinding? = null
+    private var _uiStateJob: Job? = null
 
     private var shortAnimationDuration: Int = 0
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,26 +46,38 @@ class FavoriteFragment : Fragment() {
         _binding = FragmentFavoriteBinding.inflate(inflater, container, false)
         _toolbarBinding = _binding!!.favoriteToolbar
 
-        (activity as MainActivity).supportActionBar?.title = "Favorite"
-
         _binding!!.favoriteRecyclerView.visibility = View.GONE
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
-
-        val adapter = MealListAdapter { meal ->
-            lifecycleScope.launchWhenStarted {
-                viewModel.setMealForDetail(meal)
-            }
-        }
-
-        setFavoriteMeals(adapter)
-        listenToGoToDetail()
 
         return _binding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        setToolbar(view)
+
+        activity?.findViewById<BottomNavigationView>(R.id.main_bottom_navigation_view)?.visibility =
+            View.VISIBLE
+
+
+        val adapter = MealListAdapter { meal ->
+            goToDetail(meal)
+        }
+
+        setFavoriteMeals(adapter)
+
+    }
+
+    override fun onDestroyView() {
+        _binding = null
+        _toolbarBinding = null
+        _uiStateJob?.cancel()
+        super.onDestroyView()
+    }
+
+    private fun setToolbar(view: View) {
         _toolbarBinding?.let {
             val navController = findNavController()
             val appBarConfiguration = AppBarConfiguration(navController.graph)
@@ -82,14 +92,6 @@ class FavoriteFragment : Fragment() {
                 }
             it.root.title = getString(R.string.favorite)
         }
-        activity?.findViewById<BottomNavigationView>(R.id.main_bottom_navigation_view)?.visibility =
-            View.VISIBLE
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-        _toolbarBinding = null
     }
 
     private fun setFavoriteMeals(adapter: MealListAdapter) {
@@ -101,7 +103,7 @@ class FavoriteFragment : Fragment() {
             }
         }
 
-        lifecycleScope.launchWhenStarted {
+        _uiStateJob = lifecycleScope.launchWhenStarted {
             viewModel.meals.collect { resource ->
                 when (resource.status) {
                     Resource.Status.LOADING -> {
@@ -130,21 +132,13 @@ class FavoriteFragment : Fragment() {
 
     }
 
-    private fun listenToGoToDetail() {
-        lifecycleScope.launchWhenCreated {
-            viewModel.meal.collect { meal ->
-                if (meal != null) {
-                    this@FavoriteFragment.findNavController().navigate(
-                        FavoriteFragmentDirections.actionFavoriteFragmentToDetailFragmentInFavorite(
-                            meal.id,
-                            meal.lastAccessed
-                        )
-                    )
-
-                    viewModel.navigatedToMealDetail()
-                }
-            }
-        }
+    private fun goToDetail(meal: Meal) {
+        this.findNavController().navigate(
+            FavoriteFragmentDirections.actionFavoriteFragmentToDetailFragmentInFavorite(
+                meal.id,
+                meal.lastAccessed
+            )
+        )
     }
 
     private fun showFavoriteMeals() {

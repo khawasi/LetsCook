@@ -23,9 +23,6 @@ class CategoryViewModel @Inject constructor(
     private var _categories = MutableStateFlow<Resource<List<Category>>>(Resource.loading())
     val categories = _categories.asStateFlow()
 
-    private var _category = MutableStateFlow<Category?>(null)
-    val category= _category.asStateFlow()
-
     private val currDate = currDate()
 
     init {
@@ -46,23 +43,4 @@ class CategoryViewModel @Inject constructor(
                 }
         }
     }
-
-    override fun onCleared() {
-        super.onCleared()
-        Log.v("CATEGORY", "VM CLEAR")
-    }
-
-//    fun getAllCategories(){
-//        getAllCategories(sharedPrefRepo.getString(AppConstants.CURR_DATE_CAT))
-//    }
-
-    suspend fun displayCategoryMeals(category: Category) {
-        Log.v("CATEGORY", "COLLECT 3")
-        _category.emit(category)
-    }
-
-    fun navigatedToCategoryMeals(){
-        _category.value = null
-    }
-
 }

@@ -23,6 +23,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
@@ -31,6 +32,8 @@ class DetailFragment : Fragment() {
     private val viewModel: DetailViewModel by viewModels()
 
     private var _binding: FragmentDetailBinding? = null
+    private var _uiContentJob: Job? = null
+    private var _uiFavJob: Job? = null
     private var shortAnimationDuration: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,10 +48,12 @@ class DetailFragment : Fragment() {
     ): View {
         _binding = FragmentDetailBinding.inflate(inflater, container, false)
 
-        activity?.findViewById<BottomNavigationView>(R.id.main_bottom_navigation_view)?.visibility = View.GONE
-
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
 
+        return _binding!!.root
+    }
+
+    private fun setToolbar() {
         val navController = findNavController()
         val appBarConfiguration = AppBarConfiguration(navController.graph)
         _binding!!.detailToolbar.setupWithNavController(navController, appBarConfiguration)
@@ -58,18 +63,16 @@ class DetailFragment : Fragment() {
                 viewModel.clickFavoriteMeal()
                 true
             }
-
-        return _binding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        _binding!!.detailLinearLayout.visibility = View.GONE
-        _binding!!.detailImageViewThumbnail.visibility = View.GONE
-        _binding!!.detailCollapsingToolbarLayout.title = ""
-        _binding!!.detailToolbar.title = ""
+        setToolbar()
 
+        activity?.findViewById<BottomNavigationView>(R.id.main_bottom_navigation_view)?.visibility = View.GONE
+
+        initVisibility()
 
         val adapter = DetailIngredientsListAdapter()
 
@@ -77,13 +80,22 @@ class DetailFragment : Fragment() {
         updateFavorite()
     }
 
+    private fun initVisibility() {
+        _binding!!.detailLinearLayout.visibility = View.GONE
+        _binding!!.detailImageViewThumbnail.visibility = View.GONE
+        _binding!!.detailCollapsingToolbarLayout.title = ""
+        _binding!!.detailToolbar.title = ""
+    }
+
     override fun onDestroyView() {
-        super.onDestroyView()
         _binding = null
+        _uiFavJob?.cancel()
+        _uiContentJob?.cancel()
+        super.onDestroyView()
     }
 
     private fun setDetail(adapter: DetailIngredientsListAdapter){
-        lifecycleScope.launchWhenStarted {
+        _uiContentJob = lifecycleScope.launchWhenStarted {
             viewModel.meal.collect { resource ->
                 when (resource.status) {
                     Resource.Status.LOADING -> {
@@ -128,7 +140,7 @@ class DetailFragment : Fragment() {
     }
 
     private fun updateFavorite() {
-        lifecycleScope.launchWhenStarted {
+        _uiFavJob = lifecycleScope.launchWhenStarted {
             viewModel.isFavorite.collect { isFavorite ->
                 Log.v("DETAIL FAVORITE", "UPDATE!!!!")
                 _binding?.let{

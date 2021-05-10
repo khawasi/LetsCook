@@ -24,6 +24,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -36,6 +37,7 @@ class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
     private var _toolbarBinding: LayoutToolbarBinding? = null
+    private var _uiStateJob: Job? = null
 
     private var shortAnimationDuration: Int = 0
 
@@ -51,7 +53,11 @@ class HomeFragment : Fragment() {
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
 
-        lifecycleScope.launch {
+        return _binding!!.root
+    }
+
+    private fun setRecommendedMeal() {
+        _uiStateJob = lifecycleScope.launch {
             homeViewModel.meal.collect { resource ->
                 when (resource.status) {
                     Resource.Status.LOADING -> {
@@ -78,13 +84,18 @@ class HomeFragment : Fragment() {
                 }
             }
         }
-
-
-        return _binding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setToolbar(view)
+
+        setRecommendedMeal()
+
+        activity?.findViewById<BottomNavigationView>(R.id.main_bottom_navigation_view)?.visibility = View.VISIBLE
+    }
+
+    private fun setToolbar(view: View) {
         _toolbarBinding?.let {
             val navController = findNavController()
             val appBarConfiguration = AppBarConfiguration(navController.graph)
@@ -99,13 +110,13 @@ class HomeFragment : Fragment() {
                 }
             it.root.title = getString(R.string.app_name)
         }
-        activity?.findViewById<BottomNavigationView>(R.id.main_bottom_navigation_view)?.visibility = View.VISIBLE
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         _binding = null
         _toolbarBinding = null
+        _uiStateJob?.cancel()
+        super.onDestroyView()
     }
 
     private fun setCardView(meal: Meal) {
