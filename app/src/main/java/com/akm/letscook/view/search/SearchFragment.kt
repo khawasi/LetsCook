@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -14,13 +13,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.akm.letscook.NavigationGraphDirections
 import com.akm.letscook.databinding.FragmentSearchBinding
+import com.akm.letscook.model.domain.Meal
 import com.akm.letscook.util.Resource
 import com.akm.letscook.view.rvadapter.MealListAdapter
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
 class SearchFragment : Fragment() {
@@ -28,6 +27,8 @@ class SearchFragment : Fragment() {
     private val viewModel: SearchViewModel by viewModels()
 
     private var _binding: FragmentSearchBinding? = null
+    private var _uiContentJob: Job? = null
+    private var _uiQueryJob: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,29 +36,40 @@ class SearchFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
-        _binding!!.searchTextInputLayout.setStartIconOnClickListener {
-            findNavController().popBackStack()
-        }
-
-        _binding!!.searchTextInputEditText.doAfterTextChanged {
-            viewModel.setQuery(it.toString())
-        }
-        listenToSearch()
-        showSearchResult()
-        listenToGoToDetail()
 
         return _binding!!.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        _binding?.let {
+
+            it.searchTextInputLayout.setStartIconOnClickListener {
+                findNavController().popBackStack()
+            }
+
+            it.searchTextInputEditText.doAfterTextChanged { editable ->
+                viewModel.setQuery(editable.toString())
+            }
+
+        }
+
+        listenToSearch()
+        showSearchResult()
+    }
+
     override fun onDestroyView() {
-        super.onDestroyView()
         _binding = null
+        _uiContentJob?.cancel()
+        _uiQueryJob?.cancel()
+        super.onDestroyView()
     }
 
     private fun listenToSearch() {
-        lifecycleScope.launchWhenStarted {
-            viewModel.query.collect {
-                viewModel.searchMealsByName(it)
+        _uiQueryJob = lifecycleScope.launchWhenStarted {
+            viewModel.query.collect { query ->
+                viewModel.searchMealsByName(query)
             }
         }
     }
@@ -65,19 +77,15 @@ class SearchFragment : Fragment() {
     private fun showSearchResult() {
 
         val adapter = MealListAdapter {
-            lifecycleScope.launchWhenStarted {
-                viewModel.setMealForDetail(it)
-            }
+            goToDetail(it)
         }
-
 
         _binding?.let {
             it.searchRecyclerView.layoutManager = LinearLayoutManager(requireContext())
             it.searchRecyclerView.adapter = adapter
         }
 
-
-        lifecycleScope.launchWhenStarted {
+        _uiContentJob = lifecycleScope.launchWhenStarted {
             viewModel.meals.collect { resource ->
                 when (resource.status) {
                     Resource.Status.LOADING -> {
@@ -106,19 +114,12 @@ class SearchFragment : Fragment() {
         }
     }
 
-    private fun listenToGoToDetail() {
-        lifecycleScope.launchWhenCreated {
-            viewModel.meal.collect { meal ->
-                if (meal != null) {
-                    this@SearchFragment.findNavController().navigate(
-                        NavigationGraphDirections.actionGlobalDetailFragment(
-                            meal.id,
-                            meal.lastAccessed
-                        )
-                    )
-                    viewModel.navigatedToMealDetail()
-                }
-            }
-        }
+    private fun goToDetail(meal: Meal) {
+        this.findNavController().navigate(
+            NavigationGraphDirections.actionGlobalDetailFragment(
+                meal.id,
+                meal.lastAccessed
+            )
+        )
     }
 }

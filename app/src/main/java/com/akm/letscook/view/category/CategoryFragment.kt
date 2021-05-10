@@ -13,10 +13,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.akm.letscook.databinding.FragmentCategoryBinding
+import com.akm.letscook.model.domain.Category
 import com.akm.letscook.util.Resource
 import com.akm.letscook.view.MainActivity
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
@@ -25,6 +27,7 @@ class CategoryFragment : Fragment() {
     private val viewModel: CategoryViewModel by viewModels()
 
     private var _binding: FragmentCategoryBinding? = null
+    private var _uiStateJob: Job? = null
 
     private var shortAnimationDuration: Int = 0
 
@@ -35,46 +38,39 @@ class CategoryFragment : Fragment() {
     ): View {
         _binding = FragmentCategoryBinding.inflate(inflater, container, false)
 
-        (activity as MainActivity).supportActionBar?.title = "Category"
-
         _binding!!.categoryRecyclerView.visibility = View.GONE
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
 
-        setTheCategories()
-
-        goToCategoryMeals()
-
         return _binding!!.root
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        (activity as MainActivity).supportActionBar?.title = "Category"
+
+        setTheCategories()
     }
 
-    private fun goToCategoryMeals() {
-        lifecycleScope.launchWhenStarted {
-            Log.v("CATEGORY", "COLLECT")
-            viewModel.category.collect {
-                if (it != null) {
-                    this@CategoryFragment.findNavController().navigate(
-                        CategoryFragmentDirections.actionCategoryFragmentToCategoryMealsFragment(
-                            categoryName = it.name,
-                            savedDate = it.lastAccessed
-                        )
-                    )
-                    viewModel.navigatedToCategoryMeals()
-                }
-            }
-        }
+    override fun onDestroyView() {
+        _binding = null
+        _uiStateJob?.cancel()
+        super.onDestroyView()
+    }
+
+    private fun goToCategoryMeals(category: Category) {
+        this.findNavController().navigate(
+            CategoryFragmentDirections.actionCategoryFragmentToCategoryMealsFragment(
+                categoryName = category.name,
+                savedDate = category.lastAccessed
+            )
+        )
     }
 
     private fun setTheCategories() {
         val adapter = CategoryListAdapter {
-            lifecycleScope.launchWhenStarted {
-                viewModel.displayCategoryMeals(it)
-            }
+            goToCategoryMeals(it)
         }
 
         _binding?.let {
@@ -82,7 +78,7 @@ class CategoryFragment : Fragment() {
             it.categoryRecyclerView.adapter = adapter
         }
 
-        lifecycleScope.launchWhenStarted {
+        _uiStateJob = lifecycleScope.launchWhenStarted {
             viewModel.categories.collect { resource ->
                 when (resource.status) {
                     Resource.Status.LOADING -> {
@@ -105,7 +101,6 @@ class CategoryFragment : Fragment() {
             }
         }
     }
-
 
     private fun showCategories() {
         _binding?.let {

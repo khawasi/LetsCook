@@ -14,11 +14,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.akm.letscook.NavigationGraphDirections
 import com.akm.letscook.databinding.FragmentFavoriteBinding
+import com.akm.letscook.model.domain.Meal
 import com.akm.letscook.util.Resource
 import com.akm.letscook.view.MainActivity
 import com.akm.letscook.view.rvadapter.MealListAdapter
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
@@ -27,9 +29,9 @@ class FavoriteFragment : Fragment() {
     private val viewModel: FavoriteViewModel by viewModels()
 
     private var _binding: FragmentFavoriteBinding? = null
+    private var _uiStateJob: Job? = null
 
     private var shortAnimationDuration: Int = 0
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,27 +40,30 @@ class FavoriteFragment : Fragment() {
     ): View {
         _binding = FragmentFavoriteBinding.inflate(inflater, container, false)
 
-        (activity as MainActivity).supportActionBar?.title = "Favorite"
-
         _binding!!.favoriteRecyclerView.visibility = View.GONE
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
 
-        val adapter = MealListAdapter {
-            lifecycleScope.launchWhenStarted {
-                viewModel.setMealForDetail(it)
-            }
-        }
-
-        setFavoriteMeals(adapter)
-        listenToGoToDetail()
-
         return _binding!!.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        (activity as MainActivity).supportActionBar?.title = "Favorite"
+
+        val adapter = MealListAdapter {
+            goToDetail(it)
+        }
+
+        setFavoriteMeals(adapter)
+
+    }
+
     override fun onDestroyView() {
-        super.onDestroyView()
         _binding = null
+        _uiStateJob?.cancel()
+        super.onDestroyView()
     }
 
     private fun setFavoriteMeals(adapter: MealListAdapter) {
@@ -70,7 +75,7 @@ class FavoriteFragment : Fragment() {
             }
         }
 
-        lifecycleScope.launchWhenStarted {
+        _uiStateJob = lifecycleScope.launchWhenStarted {
             viewModel.meals.collect { resource ->
                 when (resource.status) {
                     Resource.Status.LOADING -> {
@@ -99,20 +104,13 @@ class FavoriteFragment : Fragment() {
 
     }
 
-    private fun listenToGoToDetail() {
-        lifecycleScope.launchWhenCreated {
-            viewModel.meal.collect { meal ->
-                if (meal != null) {
-                    this@FavoriteFragment.findNavController().navigate(
-                        NavigationGraphDirections.actionGlobalDetailFragment(
-                            meal.id,
-                            meal.lastAccessed
-                        )
-                    )
-                    viewModel.navigatedToMealDetail()
-                }
-            }
-        }
+    private fun goToDetail(meal: Meal) {
+        this.findNavController().navigate(
+            NavigationGraphDirections.actionGlobalDetailFragment(
+                meal.id,
+                meal.lastAccessed
+            )
+        )
     }
 
     private fun showFavoriteMeals() {

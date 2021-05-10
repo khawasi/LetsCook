@@ -15,19 +15,22 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.akm.letscook.NavigationGraphDirections
 import com.akm.letscook.databinding.FragmentCategoryMealsBinding
+import com.akm.letscook.model.domain.Meal
 import com.akm.letscook.util.Resource
 import com.akm.letscook.view.MainActivity
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
-class CategoryMealsFragment: Fragment() {
+class CategoryMealsFragment : Fragment() {
 
     private val viewModel: CategoryMealsViewModel by viewModels()
     private val fragmentArgs: CategoryMealsFragmentArgs by navArgs()
 
-    private var _binding : FragmentCategoryMealsBinding? = null
+    private var _binding: FragmentCategoryMealsBinding? = null
+    private var _uiStateJob: Job? = null
 
     private var shortAnimationDuration: Int = 0
 
@@ -38,32 +41,36 @@ class CategoryMealsFragment: Fragment() {
     ): View {
         _binding = FragmentCategoryMealsBinding.inflate(inflater, container, false)
 
-        (activity as MainActivity).supportActionBar?.title = fragmentArgs.categoryName
-
         _binding!!.categoryMealsRecyclerView.visibility = View.GONE
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
 
-        setCategoryMeals()
-
-        listenToGoToDetail()
-
         return _binding!!.root
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        (activity as MainActivity).supportActionBar?.title = fragmentArgs.categoryName
+
+        setCategoryMeals()
+
     }
 
-    private fun setCategoryMeals(){
+    override fun onDestroyView() {
+        _binding = null
+        _uiStateJob?.cancel()
+        super.onDestroyView()
+    }
+
+    private fun setCategoryMeals() {
         val adapter = CategoryMealsListAdapter { meal ->
             lifecycleScope.launchWhenCreated {
-                viewModel.setMealForDetail(meal)
+                goToDetail(meal)
             }
         }
 
-        _binding?.let{
+        _binding?.let {
             it.categoryMealsRecyclerView.apply {
                 this.layoutManager =
                     StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
@@ -71,9 +78,9 @@ class CategoryMealsFragment: Fragment() {
             }
         }
 
-        lifecycleScope.launchWhenStarted {
+        _uiStateJob = lifecycleScope.launchWhenStarted {
             viewModel.meals.collect { resource ->
-                when(resource.status){
+                when (resource.status) {
 
                     Resource.Status.LOADING -> {
 
@@ -90,7 +97,7 @@ class CategoryMealsFragment: Fragment() {
                     }
 
                     Resource.Status.ERROR -> {
-                        _binding?.let{
+                        _binding?.let {
                             Snackbar.make(it.root, resource.message!!, Snackbar.LENGTH_LONG).show()
                         }
                         Log.v("CMEALS", "ERROR")
@@ -101,20 +108,14 @@ class CategoryMealsFragment: Fragment() {
         }
     }
 
-    private fun listenToGoToDetail(){
-        lifecycleScope.launchWhenCreated {
-            viewModel.meal.collect { meal ->
-                if (meal!=null){
-                    this@CategoryMealsFragment.findNavController().navigate(
-                        NavigationGraphDirections.actionGlobalDetailFragment(
-                            meal.id,
-                            meal.lastAccessed
-                        )
-                    )
-                    viewModel.navigatedToMealDetail()
-                }
-            }
-        }
+    private fun goToDetail(meal: Meal) {
+        this.findNavController().navigate(
+            NavigationGraphDirections.actionGlobalDetailFragment(
+                meal.id,
+                meal.lastAccessed
+            )
+        )
+
     }
 
     private fun showCategoryMeals() {

@@ -25,9 +25,6 @@ class SearchViewModel @Inject constructor(
     private var _meals = MutableStateFlow<Resource<List<Meal>>>(Resource.loading())
     val meals = _meals.asStateFlow()
 
-    private var _meal = MutableStateFlow<Meal?>(null)
-    val meal = _meal.asStateFlow()
-
     init {
         searchMealsByName("")
     }
@@ -43,14 +40,6 @@ class SearchViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    suspend fun setMealForDetail(meal: Meal){
-        _meal.emit(meal)
-    }
-
-    fun navigatedToMealDetail(){
-        _meal.value = null
     }
 
     fun setQuery(queryName: String){

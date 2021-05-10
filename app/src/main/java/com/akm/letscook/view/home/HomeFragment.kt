@@ -13,7 +13,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import coil.load
-import coil.metadata
 import coil.transform.RoundedCornersTransformation
 import com.akm.letscook.NavigationGraphDirections
 import com.akm.letscook.R
@@ -23,6 +22,7 @@ import com.akm.letscook.util.Resource
 import com.akm.letscook.view.MainActivity
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -34,6 +34,7 @@ class HomeFragment : Fragment() {
     private val homeViewModel: HomeViewModel by viewModels()
 
     private var _binding: FragmentHomeBinding? = null
+    private var _uiStateJob: Job? = null
 
     private var shortAnimationDuration: Int = 0
 
@@ -44,13 +45,29 @@ class HomeFragment : Fragment() {
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
 
-        (activity as MainActivity).supportActionBar?.title = getString(R.string.app_name)
-
         _binding!!.homeCardView.visibility = View.GONE
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
 
-        lifecycleScope.launch {
+        return _binding!!.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        (activity as MainActivity).supportActionBar?.title = getString(R.string.app_name)
+
+        setRecommendedMeal()
+    }
+
+    override fun onDestroyView() {
+        _binding = null
+        _uiStateJob?.cancel()
+        super.onDestroyView()
+    }
+
+    private fun setRecommendedMeal(){
+        _uiStateJob = lifecycleScope.launch {
             homeViewModel.meal.collect { resource ->
                 when (resource.status) {
                     Resource.Status.LOADING -> {
@@ -77,14 +94,6 @@ class HomeFragment : Fragment() {
                 }
             }
         }
-
-
-        return _binding!!.root
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     private fun setCardView(meal: Meal){
