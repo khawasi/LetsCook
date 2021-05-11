@@ -2,12 +2,15 @@ package com.akm.letscook.view.category
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
@@ -20,6 +23,7 @@ import com.akm.letscook.databinding.FragmentCategoryBinding
 import com.akm.letscook.databinding.LayoutToolbarBinding
 import com.akm.letscook.model.domain.Category
 import com.akm.letscook.util.Resource
+import com.akm.letscook.view.MainViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,6 +34,7 @@ import kotlinx.coroutines.flow.collect
 class CategoryFragment : Fragment() {
 
     private val viewModel: CategoryViewModel by viewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     private var _binding: FragmentCategoryBinding? = null
     private var _toolbarBinding: LayoutToolbarBinding? = null
@@ -83,13 +88,44 @@ class CategoryFragment : Fragment() {
             val appBarConfiguration = AppBarConfiguration(navController.graph)
             it.root.setupWithNavController(navController, appBarConfiguration)
             it.root.inflateMenu(R.menu.menu_toolbar)
-            it.root.menu.findItem(R.id.navigation_graph_search)
-                .setOnMenuItemClickListener {
-                    view.findNavController().navigate(
-                        CategoryFragmentDirections.actionCategoryFragmentToNavigationGraphSearch()
-                    )
-                    true
+            it.root.menu.findItem(R.id.day_night_theme).title =
+                when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+                    Configuration.UI_MODE_NIGHT_YES -> {
+//                                dark mode is on
+                        getString(R.string.light_mode)
+                    }
+                    Configuration.UI_MODE_NIGHT_NO -> {
+//                                light mode is on
+                        getString(R.string.dark_mode)
+                    }
+                    else -> ""
                 }
+
+            it.root.setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
+                    R.id.navigation_graph_search -> {
+                        view.findNavController().navigate(
+                            CategoryFragmentDirections.actionCategoryFragmentToNavigationGraphSearch()
+                        )
+                        true
+                    }
+                    R.id.day_night_theme -> {
+                        when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
+                            Configuration.UI_MODE_NIGHT_YES -> {
+//                                dark mode is on turned to light mode
+                                mainViewModel.setIsNightMode(false)
+                            }
+                            Configuration.UI_MODE_NIGHT_NO -> {
+//                                light mode is on turned to dark mode
+                                mainViewModel.setIsNightMode(true)
+                            }
+                        }
+                        true
+                    }
+                    else -> false
+                }
+            }
+
             it.root.title = getString(R.string.category)
         }
     }

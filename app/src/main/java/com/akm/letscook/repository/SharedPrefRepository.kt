@@ -29,12 +29,18 @@ class SharedPrefRepository (
 
     fun getLong(key: String): Long = sharedPref.getLong(key, -1)
 
+    fun getBoolean(key: String): Boolean = sharedPref.getBoolean(key, false)
+
     fun putString(key: String, value: String){
         editor.putString(key, value).apply()
     }
 
     fun putLong(key: String, value: Long){
         editor.putLong(key, value).apply()
+    }
+
+    fun putBoolean(key: String, value: Boolean){
+        editor.putBoolean(key, value).apply()
     }
 
 }
