@@ -2,10 +2,12 @@ package com.akm.letscook.view.category
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import com.akm.letscook.R
 import com.akm.letscook.databinding.ItemListVerticalBinding
 import com.akm.letscook.model.domain.Category
 
@@ -51,8 +53,17 @@ class CategoryListAdapter(private val onItemClicked: (Category) -> Unit) :
 
         fun bindCategory(category: Category) {
             currentCategory = category
-            binding.itemImageView.load(category.thumbnailUrl)
-            binding.itemTextView.text = category.name
+            binding.apply {
+                itemImageView.load(category.thumbnailUrl) {
+                    error(
+                        ContextCompat.getDrawable(
+                            binding.itemImageView.context,
+                            R.drawable.ic_baseline_error_outline_24
+                        )
+                    )
+                }
+                itemTextView.text = category.name
+            }
         }
 
     }

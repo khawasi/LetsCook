@@ -127,7 +127,14 @@ class DetailFragment : Fragment() {
 
     private fun bindMeal(meal: Meal, adapter: DetailIngredientsListAdapter) {
         _binding?.let {
-            it.detailImageViewThumbnail.load(meal.thumbnailUrl)
+            it.detailImageViewThumbnail.load(meal.thumbnailUrl) {
+                error(context?.let { it1 ->
+                    ContextCompat.getDrawable(
+                        it1,
+                        R.drawable.ic_baseline_error_outline_24
+                    )
+                })
+            }
 //            {
 //                allowHardware(false)
 //                target(
@@ -153,9 +160,9 @@ class DetailFragment : Fragment() {
             it.detailImageViewThumbnail.contentDescription = "Image For ${meal.name}"
             it.detailInstructionTextView.text = meal.instructions
             it.detailIngredientsRecyclerView.adapter = adapter
-//            val textTitle: Spannable = SpannableString(meal.name)
-//            textTitle.setSpan(ForegroundColorSpan(Color.WHITE), 0, textTitle.length, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
-            it.detailCollapsingToolbarLayout.title = meal.name
+//            it.detailCollapsingToolbarLayout.title = meal.name
+            it.detailToolbarTitleTextView.text = meal.name
+            it.detailToolbarTitleTextView.isSelected = true
         }
         adapter.submitList(meal.ingredients)
     }

@@ -2,10 +2,12 @@ package com.akm.letscook.view.categorymeals
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import com.akm.letscook.R
 import com.akm.letscook.databinding.ItemListCardBinding
 import com.akm.letscook.model.domain.Meal
 
@@ -50,8 +52,17 @@ class CategoryMealsListAdapter(private val onItemClicked: (Meal) -> Unit) :
 
         fun bind(meal: Meal) {
             currentMeal = meal
-            binding.itemImageView.load(meal.thumbnailUrl)
-            binding.itemTextView.text = meal.name
+            binding.apply {
+                itemImageView.load(meal.thumbnailUrl) {
+                    error(
+                        ContextCompat.getDrawable(
+                            binding.itemImageView.context,
+                            R.drawable.ic_baseline_error_outline_24
+                        )
+                    )
+                }
+                itemTextView.text = meal.name
+            }
         }
 
     }

@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -102,13 +103,14 @@ class HomeFragment : Fragment() {
             it.homeTextViewName.text = meal.name
             it.homeImageViewThumbnail.apply {
                 load(meal.thumbnailUrl) {
-                    allowHardware(false)
-                    transformations(RoundedCornersTransformation(4f, 4f, 4f, 4f))
+//                    allowHardware(false)
+//                    transformations(RoundedCornersTransformation(4f, 4f, 4f, 4f))
+                    error(ContextCompat.getDrawable(context, R.drawable.ic_baseline_error_outline_24))
                 }
                 transitionName = meal.id.toString()
 //                            memoryCacheKey = metadata!!.memoryCacheKey.toString()
             }
-            it.homeLinearLayout.setOnClickListener { view ->
+            it.homeConstraintLayout.setOnClickListener { view ->
 
 //                memoryCacheKey =
 //                    it.homeImageViewThumbnail.metadata!!.memoryCacheKey.toString()
