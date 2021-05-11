@@ -7,4 +7,5 @@ object AppConstants {
     const val CURR_DATE_CAT = "currDateCat"
     const val CAT_LAST_ACCESSED = "catLastAccessed"
     const val CATEGORY_NAME = "categoryName"
+    const val IS_NIGHT_MODE = "isNightMode"
 }

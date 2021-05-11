@@ -1,12 +1,11 @@
 package com.akm.letscook.repository
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 
 class SharedPrefRepository (
-        private val context: Context
+        context: Context
 ) {
     private val mainKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -29,12 +28,18 @@ class SharedPrefRepository (
 
     fun getLong(key: String): Long = sharedPref.getLong(key, -1)
 
+    fun getBoolean(key: String): Boolean = sharedPref.getBoolean(key, false)
+
     fun putString(key: String, value: String){
         editor.putString(key, value).apply()
     }
 
     fun putLong(key: String, value: Long){
         editor.putLong(key, value).apply()
+    }
+
+    fun putBoolean(key: String, value: Boolean){
+        editor.putBoolean(key, value).apply()
     }
 
 }

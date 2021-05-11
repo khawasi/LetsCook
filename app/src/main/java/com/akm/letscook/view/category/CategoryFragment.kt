@@ -12,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.akm.letscook.R
 import com.akm.letscook.databinding.FragmentCategoryBinding
 import com.akm.letscook.model.domain.Category
 import com.akm.letscook.util.Resource
@@ -41,6 +42,7 @@ class CategoryFragment : Fragment() {
         _binding!!.categoryRecyclerView.visibility = View.GONE
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
+        (activity as MainActivity).supportActionBar?.title = ""
 
         return _binding!!.root
     }
@@ -48,9 +50,13 @@ class CategoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (activity as MainActivity).supportActionBar?.title = "Category"
-
         setTheCategories()
+    }
+
+
+    override fun onResume() {
+        (activity as MainActivity).supportActionBar?.title = getString(R.string.category)
+        super.onResume()
     }
 
     override fun onDestroyView() {

@@ -221,7 +221,9 @@ class AppRepositoryTransactionImpl @Inject constructor(
                 }
             }
 
-        }.flowOn(ioDispatcher)
+        }
+            .distinctUntilChanged()
+            .flowOn(ioDispatcher)
 
     override suspend fun getFavoriteMeals() =
         flow {

@@ -35,11 +35,6 @@ class DetailFragment : Fragment() {
     private var _uiFavJob: Job? = null
     private var shortAnimationDuration: Int = 0
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

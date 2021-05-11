@@ -5,4 +5,6 @@
     <string name="search">Search</string>
     <string name="favorite">Favorite</string>
     <string name="search_hint">Type here (More than 2 characters)</string>
+    <string name="light_mode">Light Mode</string>
+    <string name="dark_mode">Dark Mode</string>
 </resources>

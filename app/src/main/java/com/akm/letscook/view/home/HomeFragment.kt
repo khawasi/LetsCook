@@ -14,7 +14,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import coil.load
-import coil.transform.RoundedCornersTransformation
 import com.akm.letscook.NavigationGraphDirections
 import com.akm.letscook.R
 import com.akm.letscook.databinding.FragmentHomeBinding
@@ -49,6 +48,7 @@ class HomeFragment : Fragment() {
         _binding!!.homeCardView.visibility = View.GONE
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
+        (activity as MainActivity).supportActionBar?.title = ""
 
         return _binding!!.root
     }
@@ -56,9 +56,12 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (activity as MainActivity).supportActionBar?.title = getString(R.string.app_name)
-
         setRecommendedMeal()
+    }
+
+    override fun onResume() {
+        (activity as MainActivity).supportActionBar?.title = getString(R.string.app_name)
+        super.onResume()
     }
 
     override fun onDestroyView() {
@@ -98,22 +101,15 @@ class HomeFragment : Fragment() {
     }
 
     private fun setCardView(meal: Meal){
-//        var memoryCacheKey = ""
         _binding?.let {
             it.homeTextViewName.text = meal.name
             it.homeImageViewThumbnail.apply {
                 load(meal.thumbnailUrl) {
-//                    allowHardware(false)
-//                    transformations(RoundedCornersTransformation(4f, 4f, 4f, 4f))
                     error(ContextCompat.getDrawable(context, R.drawable.ic_baseline_error_outline_24))
                 }
                 transitionName = meal.id.toString()
-//                            memoryCacheKey = metadata!!.memoryCacheKey.toString()
             }
             it.homeConstraintLayout.setOnClickListener { view ->
-
-//                memoryCacheKey =
-//                    it.homeImageViewThumbnail.metadata!!.memoryCacheKey.toString()
 
                 val extras = FragmentNavigatorExtras(
                     it.homeImageViewThumbnail to meal.id.toString()

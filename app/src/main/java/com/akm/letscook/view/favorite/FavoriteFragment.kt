@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.akm.letscook.NavigationGraphDirections
+import com.akm.letscook.R
 import com.akm.letscook.databinding.FragmentFavoriteBinding
 import com.akm.letscook.model.domain.Meal
 import com.akm.letscook.util.Resource
@@ -43,6 +44,7 @@ class FavoriteFragment : Fragment() {
         _binding!!.favoriteRecyclerView.visibility = View.GONE
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
+        (activity as MainActivity).supportActionBar?.title = ""
 
         return _binding!!.root
     }
@@ -50,14 +52,17 @@ class FavoriteFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (activity as MainActivity).supportActionBar?.title = "Favorite"
-
         val adapter = MealListAdapter {
             goToDetail(it)
         }
 
         setFavoriteMeals(adapter)
 
+    }
+
+    override fun onResume() {
+        (activity as MainActivity).supportActionBar?.title = getString(R.string.favorite)
+        super.onResume()
     }
 
     override fun onDestroyView() {

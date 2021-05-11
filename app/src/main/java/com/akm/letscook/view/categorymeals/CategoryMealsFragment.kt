@@ -44,6 +44,7 @@ class CategoryMealsFragment : Fragment() {
         _binding!!.categoryMealsRecyclerView.visibility = View.GONE
 
         shortAnimationDuration = resources.getInteger(android.R.integer.config_shortAnimTime)
+        (activity as MainActivity).supportActionBar?.title = ""
 
         return _binding!!.root
     }
@@ -51,10 +52,14 @@ class CategoryMealsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        (activity as MainActivity).supportActionBar?.title = fragmentArgs.categoryName
-
         setCategoryMeals()
 
+    }
+
+    override fun onResume() {
+        (activity as MainActivity).supportActionBar?.title = fragmentArgs.categoryName
+
+        super.onResume()
     }
 
     override fun onDestroyView() {
