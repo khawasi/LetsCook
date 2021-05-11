@@ -126,8 +126,9 @@ class CategoryMealsFragment : Fragment() {
     private fun goToDetail(meal: Meal) {
         this.findNavController().navigate(
             CategoryMealsFragmentDirections.actionCategoryMealsFragmentToDetailFragmentInCategory(
-                meal.id,
-                meal.lastAccessed
+                mealId = meal.id,
+                savedDate = meal.lastAccessed,
+                mealName = meal.name
             )
         )
     }

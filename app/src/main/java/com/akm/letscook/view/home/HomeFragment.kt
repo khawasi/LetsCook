@@ -126,7 +126,7 @@ class HomeFragment : Fragment() {
                 Glide.with(this).load(meal.thumbnailUrl).into(this)
                 transitionName = meal.id.toString()
             }
-            it.homeLinearLayout.setOnClickListener { view ->
+            it.homeConstraintLayout.setOnClickListener { view ->
 
 
                 val extras = FragmentNavigatorExtras(
@@ -134,8 +134,9 @@ class HomeFragment : Fragment() {
                 )
 
                 val action = HomeFragmentDirections.actionHomeFragmentToDetailFragmentInHome(
-                    meal.id,
-                    meal.lastAccessed
+                    mealId = meal.id,
+                    savedDate = meal.lastAccessed,
+                    mealName = meal.name
                 )
                 view.findNavController().navigate(action, extras)
             }

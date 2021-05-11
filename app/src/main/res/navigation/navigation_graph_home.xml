@@ -27,5 +27,8 @@
         <argument
             android:name="savedDate"
             app:argType="string" />
+        <argument
+            android:name="mealName"
+            app:argType="string" />
     </fragment>
 </navigation>

@@ -122,8 +122,9 @@ class SearchFragment : Fragment() {
     private fun goToDetail(meal: Meal) {
         this.findNavController().navigate(
             SearchFragmentDirections.actionSearchFragmentToDetailFragment(
-                meal.id,
-                meal.lastAccessed
+                mealId = meal.id,
+                savedDate = meal.lastAccessed,
+                mealName = meal.name
             )
         )
     }

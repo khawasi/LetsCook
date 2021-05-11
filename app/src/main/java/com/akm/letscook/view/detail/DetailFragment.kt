@@ -56,13 +56,15 @@ class DetailFragment : Fragment() {
     private fun setToolbar() {
         val navController = findNavController()
         val appBarConfiguration = AppBarConfiguration(navController.graph)
-        _binding!!.detailToolbar.setupWithNavController(navController, appBarConfiguration)
-        _binding!!.detailToolbar.menu.findItem(R.id.detail_action_favorite)
-            .setOnMenuItemClickListener {
-                Log.v("DETAIL FAVORITE", "TEST!!!!")
-                viewModel.clickFavoriteMeal()
-                true
-            }
+        _binding?.let{
+            it.detailToolbar.setupWithNavController(navController, appBarConfiguration)
+            it.detailToolbar.menu.findItem(R.id.detail_action_favorite)
+                .setOnMenuItemClickListener {
+                    Log.v("DETAIL FAVORITE", "TEST!!!!")
+                    viewModel.clickFavoriteMeal()
+                    true
+                }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -81,10 +83,12 @@ class DetailFragment : Fragment() {
     }
 
     private fun initVisibility() {
-        _binding!!.detailLinearLayout.visibility = View.GONE
-        _binding!!.detailImageViewThumbnail.visibility = View.GONE
-        _binding!!.detailCollapsingToolbarLayout.title = ""
-        _binding!!.detailToolbar.title = ""
+        _binding?.let{
+            it.detailLinearLayout.visibility = View.GONE
+            it.detailImageViewThumbnail.visibility = View.GONE
+            it.detailCollapsingToolbarLayout.title = ""
+            it.detailToolbar.title = ""
+        }
     }
 
     override fun onDestroyView() {
@@ -134,7 +138,9 @@ class DetailFragment : Fragment() {
             it.detailImageViewThumbnail.contentDescription = "Image For ${meal.name}"
             it.detailInstructionTextView.text = meal.instructions
             it.detailIngredientsRecyclerView.adapter = adapter
-            it.detailCollapsingToolbarLayout.title = meal.name
+//            it.detailCollapsingToolbarLayout.title = meal.name
+            it.detailToolbarTitleTextView.text = meal.name
+            it.detailToolbarTitleTextView.isSelected = true
         }
         adapter.submitList(meal.ingredients)
     }

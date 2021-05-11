@@ -135,8 +135,9 @@ class FavoriteFragment : Fragment() {
     private fun goToDetail(meal: Meal) {
         this.findNavController().navigate(
             FavoriteFragmentDirections.actionFavoriteFragmentToDetailFragmentInFavorite(
-                meal.id,
-                meal.lastAccessed
+                mealId = meal.id,
+                savedDate = meal.lastAccessed,
+                mealName = meal.name
             )
         )
     }
