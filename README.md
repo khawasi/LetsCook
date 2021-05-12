@@ -18,6 +18,7 @@ What? You want to eat chicken but don't know what to make? You can go to "Catego
 * [MVVM Architecture with Repository Patern](https://developer.android.com/jetpack/guide#recommended-app-arch) 
 * [Hilt](https://developer.android.com/training/dependency-injection/hilt-android) (Dependency injection library for Android)
 * [Navigation](https://developer.android.com/guide/navigation/navigation-getting-started) (Single Navigation Graph)
+  * For multiple navigation graph implementation, visit [HERE](https://github.com/khawasi/LetsCook/tree/mult_nav_graph)
 * [Room Persistence Library](https://developer.android.com/training/data-storage/room) (Local Database)
 * [Moshi](https://github.com/square/moshi) (A modern JSON library for Kotlin and Java)
 * [OkHttp](https://square.github.io/okhttp/) + [Retrofit](https://square.github.io/retrofit/) (A type-safe HTTP client for Android) 
