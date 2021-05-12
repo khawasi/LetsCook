@@ -1,16 +1,16 @@
-#Let's Cook
+# Let's Cook
 
 You don't know what you want to eat? Well, "Let' s Cook" will serve you a different recommended recipe that you should try every day.
 What? You want to eat chicken but don't know what to make? You can go to "Category" section and pick chicken. We will show you recipes that use chicken as main ingredient.
 "Let's Cook" also can save recipes that you like, just press the heart in the recipe page, and you can see that recipe anytime.
 
-##Screenshots
+## Screenshots
 
 ![Home Page](https://imgur.com/QSKK11Q) ![Category Page](https://imgur.com/gOVVRGW)
 
 ![Home Page Dark Mode](https://imgur.com/VX6PrOy) ![Detail Page](https://imgur.com/KoKadxG)
 
-##Tech Stack
+## Tech Stack
 * [Kotlin](https://kotlinlang.org/)
   * [Coroutines](https://developer.android.com/kotlin/coroutines?gclid=CjwKCAjw-e2EBhAhEiwAJI5jg8PEjvuQA4yyVE0XKE2UOoz5h1LlCKJ7IOMZN3DIdDE9R8ghDWIg2xoCWdMQAvD_BwE&gclsrc=aw.ds) + [Flow](https://developer.android.com/kotlin/flow) (Concurrency)
 * [MVVM Architecture with Repository Patern](https://developer.android.com/jetpack/guide#recommended-app-arch) 
@@ -26,10 +26,10 @@ What? You want to eat chicken but don't know what to make? You can go to "Catego
 * [.png to vector/.svg](https://www.autotracer.org/)
 * [Screenshot Generator](https://theapplaunchpad.com/)
 
-##API
+## API
 API is prepared by [![TheMealDB](https://www.themealdb.com/images/logo-small.png)](https://www.themealdb.com/api.php)
 
-##License
+## License
 
     Copyright 2021 Akhmad Khawasi Mazaya
 
