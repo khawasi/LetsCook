@@ -46,7 +46,7 @@ class SearchFragment : Fragment() {
         _binding?.let {
 
             it.searchTextInputLayout.setStartIconOnClickListener {
-                findNavController().popBackStack()
+                findNavController().navigateUp()
             }
 
             it.searchTextInputEditText.doAfterTextChanged { editable ->
