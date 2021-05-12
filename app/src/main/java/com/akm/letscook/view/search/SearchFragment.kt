@@ -48,13 +48,13 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        _binding?.let {
+        _binding?.let { binding ->
 
-            it.searchTextInputLayout.setStartIconOnClickListener {
-                findNavController().popBackStack()
+            binding.searchTextInputLayout.setStartIconOnClickListener {
+                findNavController().navigateUp()
             }
 
-            it.searchTextInputEditText.doAfterTextChanged {
+            binding.searchTextInputEditText.doAfterTextChanged {
                 viewModel.setQuery(it.toString())
             }
 

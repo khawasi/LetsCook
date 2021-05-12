@@ -2,56 +2,53 @@ package com.akm.letscook.view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.NavigationUI
-import androidx.navigation.ui.onNavDestinationSelected
 import com.akm.letscook.R
 import com.akm.letscook.databinding.ActivityMainBinding
 import com.akm.letscook.util.setupWithNavController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private val viewModel: MainViewModel by viewModels()
-    private var _uiStateJob: Job? = null
 
-    private lateinit var binding: ActivityMainBinding
-    private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var currentNavController: LiveData<NavController>
+    private var _uiStateJob: Job? = null
+    private var _binding: ActivityMainBinding? = null
+    private var _appBarConfiguration: AppBarConfiguration? = null
+    private var _currentNavController: LiveData<NavController>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         setTheme(R.style.Theme_LetsCook)
         super.onCreate(savedInstanceState)
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
+        _binding = ActivityMainBinding.inflate(layoutInflater)
 
-        appBarConfiguration = AppBarConfiguration(binding.mainBottomNavigationView.menu)
+        _appBarConfiguration = AppBarConfiguration(_binding!!.mainBottomNavigationView.menu)
 
 //        setupToolbar(navController, appBarConfiguration)
         if(savedInstanceState==null) {
             setupBottomNav()
-            binding.mainBottomNavigationView.selectedItemId = R.id.navigation_graph_home
+            _binding!!.mainBottomNavigationView.selectedItemId = R.id.navigation_graph_home
         }
 
         setupDayNightMode()
 
-        setContentView(binding.root)
+        setContentView(_binding!!.root)
     }
 
     override fun onDestroy() {
+        _binding = null
+        _appBarConfiguration = null
+        _currentNavController = null
         _uiStateJob?.cancel()
         super.onDestroy()
     }
@@ -62,7 +59,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return currentNavController.value?.navigateUp() ?: false
+        return _currentNavController?.value?.navigateUp() ?: false
     }
 
     private fun setupBottomNav() {
@@ -72,13 +69,13 @@ class MainActivity : AppCompatActivity() {
                 R.navigation.navigation_graph_home,
                 R.navigation.navigation_graph_favorite
             )
-        val controller = binding.mainBottomNavigationView.setupWithNavController(
+        val controller = _binding?.mainBottomNavigationView?.setupWithNavController(
             navGraphIds = navGraphIds,
             fragmentManager = supportFragmentManager,
             containerId = R.id.main_fragment_container_view,
             intent = intent
         )
-        currentNavController = controller
+        _currentNavController = controller
     }
 
     private fun setupDayNightMode(){
