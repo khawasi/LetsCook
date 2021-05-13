@@ -34,7 +34,9 @@ API is prepared by [![TheMealDB](https://www.themealdb.com/images/logo-small.png
 
 ## Disclaimer
 This app is created based on what i have been learned through tutorial and codelabs by myself.
+
 So, if there are (and i believe there will be) some problems, please do tell me about it.
+
 And also if you have sugestions, again, please do tell me about it.
 
 ## License
